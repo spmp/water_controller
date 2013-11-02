@@ -14,8 +14,6 @@ uint16_t distance;
  * to the ICR1 register. */
 
 void init_ultrasonic() {
-    /* outputs: DDB4, DDB5; inputs: DDB0 */
-    DDRB = (1 << DDB4) | (1 << DDB5);
     PCMSK0 = (1 << PCINT0); /* interrupt mask for DDB0 */
 
     /* timer 1: interrupt on ICP1 falling, 2MHz, dt=0.5us */
@@ -29,81 +27,87 @@ ISR(PCINT0_vect) {
     TCNT1 = 0; /* reset timer1 */
     TCCR1B = (1 << CS11); /* enable timer1 */
     PCICR &= ~(1 << PCIE0); /* disable DDB0 interrupt */
-    PORTB |= (1 << PORTB5);
 }
 
 /* falling edge of DDB0 only */
 ISR(TIMER1_CAPT_vect) {
-    /* turn off falling edge interrupt */
-    distance = ICR1;
+    distance = ICR1; /* turn off falling edge interrupt */
     TCCR1B &= ~(1 << CS11); /* disable timer1 */
-    PORTB &= ~(1 << PORTB5);
-
-    /* TODO: move out of interrupt */
-    send_uint16(distance);
-    send_char('\r');
-    send_char('\n');
 }
 
 void run_distance_measure() {
     PCICR |= (1 << PCIE0); /* enable DDB0 rising interrupt */
 
-    /* ping the range sensor for 20us to start a range measurement */
+    /* ping the range sensor for 10us to start a range measurement */
+    DDRB |= (1 << DDB4);
     PORTB |= (1 << PORTB4);
-    _delay_us(20);
+    _delay_us(10);
     PORTB &= ~(1 << PORTB4);
-}
-
-void init_analog() {
-    /* turn on analog, division factor of 128 */
-    ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 }
 
 uint16_t read_analog_pin(uint8_t adc_pin) {
     /* AVcc as reference voltage */
     ADMUX = (1 << REFS0) | (adc_pin & 0xF);
-    /* start measure & wait until complete */
-    ADCSRA |= (1 << ADSC);
+    /* start measure & wait until complete; prescaler 128 */
+    ADCSRA = (1 << ADEN) | (1 << ADSC) | 0x7;
     while ((ADCSRA & (1 << ADSC)) != 0);
-
     return ADC;
 }
 
-void run_analog_measure() {
+struct Inputs {
+    uint16_t distance;
+    uint16_t pot_value;
+};
+
+struct Program {
+    struct Inputs inputs;
+};
+
+struct Inputs read_inputs() {
+    struct Inputs inputs;
+    inputs.distance = distance;
+    inputs.pot_value = read_analog_pin(3);
+    return inputs;
+}
+
+void write_state_to_usart(struct Program *program) {
     send_char('a');
     send_char(' ');
-    send_uint16(read_analog_pin(3));
+    send_uint16(timestamp & 0xFFFF);
     send_char(' ');
+    send_uint16(program->inputs.distance);
+    send_char(' ');
+    send_uint16(program->inputs.pot_value);
+    send_char('\r');
+    send_char('\n');
+}
+
+void loop(struct Program *program) {
+    program->inputs = read_inputs();
+    write_state_to_usart(program);
+
+    run_distance_measure();
+    _delay_ms(120);
 }
 
 void toggle_led() {
     PORTB ^= (1 << PORTB5);
 }
 
-void loop() {
-    /*
-    run_analog_measure();
-    _delay_ms(50);
-    run_distance_measure();
-    _delay_ms(100);
-    */
-    _delay_ms(100);
-    // PORTB ^= (1 << PORTB5);
-    // send_char('a');
-}
-
 int main() {
     cli();
     init_clock();
     init_usart();
-    oncePerSecondCallback = &toggle_led;
-    /*
-    init_analog();
     init_ultrasonic();
-    */
+
+    DDRB |= (1 << DDB5);
+    oncePerSecondCallback = &toggle_led;
     sei();
 
-    for (;;) loop();
+    struct Program program;
+    for (;;) {
+        loop(&program);
+    }
 
     return 0;
 }
