@@ -3,6 +3,7 @@
 #include <util/delay.h>
 
 #include "usart.h"
+#include "clock.h"
 
 uint16_t distance;
 
@@ -54,7 +55,7 @@ void run_distance_measure() {
 }
 
 void init_analog() {
-    /* turn on analog, division factor of 16 */
+    /* turn on analog, division factor of 128 */
     ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 }
 
@@ -75,18 +76,31 @@ void run_analog_measure() {
     send_char(' ');
 }
 
+void toggle_led() {
+    PORTB ^= (1 << PORTB5);
+}
+
 void loop() {
+    /*
     run_analog_measure();
     _delay_ms(50);
     run_distance_measure();
     _delay_ms(100);
+    */
+    _delay_ms(100);
+    // PORTB ^= (1 << PORTB5);
+    // send_char('a');
 }
 
 int main() {
     cli();
+    init_clock();
     init_usart();
+    oncePerSecondCallback = &toggle_led;
+    /*
     init_analog();
     init_ultrasonic();
+    */
     sei();
 
     for (;;) loop();

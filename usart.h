@@ -1,4 +1,7 @@
 #pragma once
+#include <avr/io.h>
+
+/* Resources: USART */
 
 void init_usart();
 
