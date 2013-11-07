@@ -47,28 +47,42 @@ number of seconds since the program started) at regular intervals.
 
 To view the output, run `screen /dev/ttyUSB0 57600` (exit with `C-a k y`).
 
-Logging daemon (_Not started_)
-------------------------------
+Logging daemon (logger.py)
+--------------------------
 
-This should save the data sent from the MCU to a sqlite3 database. It should
-also have an interface for sending commands to the MCU. That will be over
-TCP or a named pipe. Written in Python3.
+This saves the data sent from the MCU to a sqlite3 database. Written in
+Python3. To run it, just run
 
-Web interface (_Not started_)
------------------------------
+    $ ./logger.py
 
-This needs to display useful graphs on a nice and pretty web page. It will
-read from the sqlite3 database to supply the graph data, and the graphs will
-be rendered client-side using some modern js chart api.
+when the MCU is connected to the computer. The program will print out the
+messages it recieves from the MCU, and also insert them into the database
+`log_timeseries.db`. Type `Ctrl-C` or `Ctrl-D` to exit. You can view the
+database directly using `sqlite3 log_timerseries.db`.
 
-The backend will be written in Python3 and serve web pages using one of, say,
+The logger should also have an interface for sending commands to the MCU. The
+interface will be over TCP or a named pipe.
 
- * pure Python3 web server
- * apache + mod\_wsgi
- * nginx + uwsgi
+Web interface
+-------------
 
-Basically pick whichever one is easiest.
+The backend of the web layer reads from the sqlite3 database and displays
+useful graphs on a web page. The graphs are rendered client-side using
+jqplot, a jquery plugin. All of the javascript libraries are accessed over
+cdn, meaning they don't have to be stored on the web server.
 
-The web page will also contain some commands to directly control the MCU. These
-will be sent via the web backend to the logging daemon and then to the MCU.
+The backend is written in Python3, and uses the [Bottle web framework][bottle].
+Bottle is a WSGI compliant framework, so it can be used with apache or nginx.
+It can also run on its own using the builtin Python WSGIServer. This is the
+current setup, and it can be run using
+
+    $ web/webapp.py
+
+where it serves the files to localhost:8080.
+
+[bottle]: http://bottlepy.org/docs/stable/
+
+The web page should also contain some commands to directly control the MCU.
+These will be sent via the web backend to the logging daemon and from there
+on to the MCU.
 

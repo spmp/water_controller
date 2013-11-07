@@ -1,0 +1,89 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Water Controller Information</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/jqplot/1.0.8/jquery.jqplot.js"></script>
+    <script src="http://cdn.jsdelivr.net/jqplot/1.0.8/plugins/jqplot.dateAxisRenderer.min.js"></script>
+    <link href="//cdn.jsdelivr.net/jqplot/1.0.8/jquery.jqplot.css" rel="stylesheet" type="text/css" media="all">
+    <style>
+    #big_chart {
+        width: 90%;
+        height: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    </style>
+</head>
+<body>
+    <h1>A nice graph should go below here</h1>
+    <div id="big_chart"></div>
+
+    <script>
+    $(function() {
+        console.log("hi all document ready");
+
+        function convertToSeries(data) {
+
+            var series = { all: [] };
+
+            data.values.forEach(function (item) {
+                timestamp = new Date(item.time.replace(" ", "T") + 'Z'); // new Date(item.time);
+                for (var fieldName in item) {
+                    if (item.hasOwnProperty(fieldName) && fieldName != "time") {
+                        if (!series.hasOwnProperty(fieldName)) {
+                            series[fieldName] = [];
+                        }
+                        series[fieldName].push([timestamp, item[fieldName]]);
+                    }
+                }
+                series['all'].push([timestamp, item['analog1'], item['distance']]);
+            });
+
+            return series;
+        }
+
+        $.ajax({ url: "/logs/80" }).done(function (data) {
+            var timeSeriesData = convertToSeries(data);
+            console.log($.jqplot.config.defaultColors);
+
+            $.jqplot(
+                'big_chart',
+                [timeSeriesData.analog1, timeSeriesData.distance, timeSeriesData.temperature], {
+                    title: "Water Controller Time Series",
+                    grid: {
+                        shadow: false,
+                        background: '#f8f8f8'
+                        // borderWidth: 1.2
+                    },
+                    axes: {
+                        xaxis: {
+                            // pad: 1.5,
+                            renderer: $.jqplot.DateAxisRenderer
+                        },
+                        yaxis: { useSeriesColor: true, syncTicks: true },
+                        y2axis: { useSeriesColor: true, syncTicks: true },
+                        y3axis: { useSeriesColor: true, syncTicks: true },
+                        y4axis: { useSeriesColor: true, syncTicks: true }
+                    },
+                    seriesColors: $.jqplot.config.defaultColors.slice(-10),
+                    series: [
+                        {
+                            yaxis: 'yaxis'
+                        },
+                        {
+                            yaxis: 'y2axis'
+                        },
+                        {
+                            yaxis: 'y4axis'
+                        }
+                    ]
+                });
+            });
+
+    });
+    </script>
+</body>
+</html>

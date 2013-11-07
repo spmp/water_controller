@@ -74,7 +74,7 @@ void loop(struct Program *program) {
     write_state_to_usart(program);
 
     trigger_ultrasonic_measure();
-    _delay_ms(120);
+    _delay_ms(500);
 }
 
 void toggle_led() {
