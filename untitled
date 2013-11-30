@@ -1,0 +1,369 @@
+ADC Notes to self
+
+PRADC, in ”Minimizing Power Consumption” on page 41 must be disabled by writ-
+ing a logical zero to enable the ADC.
+
+The analog input channel is selected by writing to the MUX bits in ADMUX
+
+The ADC is enabled by setting the ADC Enable bit, ADEN in ADCSRA
+
+The ADC generates a 10-bit result which is presented in the ADC Data Registers, ADCH and ADCL. By default,
+the result is presented right adjusted, but can optionally be presented left adjusted by setting the ADLAR bit in
+ADMUX.
+
+ADMUX – ADC Multiplexer Selection Register
+REFS1 REFS0 ADLAR – MUX3 MUX2 MUX1 MUX0
+
+Bit 7:6 – REFS[1:0]: Reference Selection Bits
+These bits select the voltage reference for the ADC
+0 0 AREF, Internal Vref turned off
+0 1 AVCC with external capacitor at AREF pin
+1 1 Internal 1.1V Voltage Reference with external capacitor at AREF pin 
+ Must use 1.1v for internal temperature sensor.
+ 
+Bit 5 – ADLAR: ADC Left Adjust Result
+The ADLAR bit affects the presentation of the ADC conversion result in the ADC Data Register. Write one to
+ADLAR to left adjust the result. Otherwise, the result is right adjusted.
+
+Bits 3:0 – MUX[3:0]: Analog Channel Selection Bits
+The value of these bits selects which analog inputs are connected to the ADC
+MUX3...0 Single Ended Input
+0000 ADC0
+0001 ADC1
+0010 ADC2
+0011 ADC3
+0100 ADC4
+0101 ADC5
+0110 ADC6
+0111 ADC7
+1000 ADC8 -- For Temperature Sensor. (Internal pin)
+1110 1.1V (VBG)
+1111 0V (GND)
+
+ADCSRA – ADC Control and Status Register A
+ADEN ADSC ADATE ADIF ADIE ADPS2 ADPS1 ADPS0
+
+Bit 7 – ADEN: ADC Enable
+Writing this bit to one enables the ADC. By writing it to zero, the ADC is turned off. Turning the ADC off while a con-
+version is in progress, will terminate this conversion
+
+Bit 6 – ADSC: ADC Start Conversion
+In Single Conversion mode, write this bit to one to start each conversion.
+ADSC will read as one as long as a conversion is in progress. When the conversion is complete, it returns to zero.
+Writing zero to this bit has no effect.
+
+Bit 5 – ADATE: ADC Auto Trigger Enable
+When this bit is written to one, Auto Triggering of the ADC is enabled. 
+
+Bit 4 – ADIF: ADC Interrupt Flag
+This bit is set when an ADC conversion completes and the Data Registers are updated. The ADC Conversion
+Complete Interrupt is executed if the ADIE bit and the I-bit in SREG are set. ADIF is cleared by hardware when
+executing the corresponding interrupt handling vector.
+
+Bit 3 – ADIE: ADC Interrupt Enable
+When this bit is written to one and the I-bit in SREG is set, the ADC Conversion Complete Interrupt is activated.
+
+Bits 2:0 – ADPS[2:0]: ADC Prescaler Select Bits
+These bits determine the division factor between the system clock frequency and the input clock to the ADC.
+ADPS2 ADPS0 ADPS1 Division Factor
+0 0 0 2
+0 0 1 2
+0 1 0 4
+0 1 1 8
+1 0 0 16
+1 0 1 32
+1 1 0 64
+1 1 1 128
+
+ADCL and ADCH – The ADC Data Register
+ADLAR = 0
+(0x79) – – – – – – ADC9 ADC8 ADCH
+(0x78) ADC7 ADC6 ADC5 ADC4 ADC3 ADC2 ADC1 ADC0 ADCL
+
+ADLAR = 1
+(0x79) ADC9 ADC8 ADC7 ADC6 ADC5 ADC4 ADC3 ADC2 ADCH
+(0x78) ADC1 ADC0 – – – – – – ADCL
+
+ADC9:0: ADC Conversion Result
+These bits represent the result from the conversion, as detailed in ”ADC Conversion Result”
+
+ADCSRB – ADC Control and Status Register B
+– ACME – – – ADTS2 ADTS1 ADTS0
+
+Bit 2:0 – ADTS[2:0]: ADC Auto Trigger Source
+
+DIDR0 – Digital Input Disable Register 0
+– – ADC5D ADC4D ADC3D ADC2D ADC1D ADC0D
+
+Bit 5:0 – ADC5D...ADC0D: ADC5...0 Digital Input Disable
+When this bit is written logic one, the digital input buffer on the corresponding ADC pin is disabled.
+*Note that ADC pins ADC7 and ADC6 do not have digital input buffers, and therefore do not require Digital Input
+Disable bits.
+
+
+TIMERS!!!
+*=======*
+ 8 BIT TIMER 0
+TCCR0A – Timer/Counter Control Register A
+7 6 5 4 3 2 1 0
+COM0A1 COM0A0 COM0B1 COM0B0 – – WGM01 WGM00
+Bits 7:6 – COM0A1:0: Compare Match Output A Mode
+These bits control the Output Compare pin (OC0A) behavior.
+If one or both of the COM0A1:0 bits are set, the
+OC0A output overrides the normal port functionality of the I/O pin it is connected to. However, note that the Data
+Direction Register (DDR) bit corresponding to the OC0A pin must be set in order to enable the output driver.
+
+COM0A1 COM0A0 
+Description
+0 0 Normal port operation, OC0A disconnected.
+0 1 Toggle OC0A on Compare Match
+1 0 Clear OC0A on Compare Match
+1 1 Set OC0A on Compare Match
+
+Bits 5:4 – COM0B1:0: Compare Match Output B Mode
+These bits control the Output Compare pin (OC0B) behavior.
+*Same note
+Compare Output Mode, non-PWM Mode
+COM0B1 COM0B0 
+Description
+0 0 Normal port operation, OC0B disconnected.
+0 1 Toggle OC0B on Compare Match
+1 0 Clear OC0B on Compare Match
+1 1 Set OC0B on Compare Match
+
+Bits 1:0 – WGM01:0: Waveform Generation Mode
+Combined with the WGM02 bit found in the TCCR0B Register, these bits control the counting sequence of the
+counter, the source for maximum (TOP) counter value, and what type of waveform generation to be used,
+Mode WGM02 WGM01 WGM00 0 0 0 0 Normal 0xFF Immediate MAX
+1 0 0 1 PWM, Phase 0xFF TOP BOTTOM
+        Correct 
+2 0 1 0 CTC OCRA Immediate MAX
+3 0 1 1 Fast PWM 0xFF BOTTOM MAX
+4 1 0 0 Reserved – – –
+5 1 0 1 PWM, Phase OCRA TOP BOTTOM
+        Correct 
+6 1 1 0 Reserved – – –
+7 1 1 1 Fast PWM OCRA BOTTOM TOP
+
+TCCR0B – Timer/Counter Control Register B
+7 6 5 4 3 2 1 0
+FOC0A FOC0B – – WGM02 CS02 CS01 CS00
+
+Bit 7 – FOC0A: Force Output Compare A
+The FOC0A bit is only active when the WGM bits specify a non-PWM mode.
+
+Bit 6 – FOC0B: Force Output Compare B
+The FOC0B bit is only active when the WGM bits specify a non-PWM mode.
+
+Bit 3 – WGM02: Waveform Generation Mode
+
+Bits 2:0 – CS02:0: Clock Select
+
+CS02 CS01 CS00 Description
+0 0 0 No clock source (Timer/Counter stopped)
+0 0 1 clkI/O/(No prescaling)
+0 1 0 clkI/O/8 (From prescaler)
+0 1 1 clkI/O/64 (From prescaler)
+1 0 0 clkI/O/256 (From prescaler)
+1 0 1 clkI/O/1024 (From prescaler)
+1 1 0 External clock source on T0 pin. Clock on falling edge.
+1 1 1 External clock source on T0 pin. Clock on rising edge.
+
+TCNT0 – Timer/Counter Register
+TCNT0[7:0]
+
+COM0A1 COM0A0 
+Description
+0 0 Normal port operation, OC0A disconnected.
+0 1 Toggle OC0A on Compare Match
+1 0 Clear OC0A on Compare Match
+1 1 Set OC0A on Compare Match
+
+Bits 5:4 – COM0B1:0: Compare Match Output B Mode
+These bits control the Output Compare pin (OC0B) behavior.
+*Same note
+Compare Output Mode, non-PWM Mode
+COM0B1 COM0B0 
+Description
+0 0 Normal port operation, OC0B disconnected.
+0 1 Toggle OC0B on Compare Match
+1 0 Clear OC0B on Compare Match
+1 1 Set OC0B on Compare Match
+
+Bits 1:0 – WGM01:0: Waveform Generation Mode
+Combined with the WGM02 bit found in the TCCR0B Register, these bits control the counting sequence of the
+counter, the source for maximum (TOP) counter value, and what type of waveform generation to be used,
+Mode WGM02 WGM01 WGM00 0 0 0 0 Normal 0xFF Immediate MAX
+1 0 0 1 PWM, Phase 0xFF TOP BOTTOM
+        Correct 
+2 0 1 0 CTC OCRA Immediate MAX
+3 0 1 1 Fast PWM 0xFF BOTTOM MAX
+4 1 0 0 Reserved – – –
+5 1 0 1 PWM, Phase OCRA TOP BOTTOM
+        Correct 
+6 1 1 0 Reserved – – –
+7 1 1 1 Fast PWM OCRA BOTTOM TOP
+
+TCCR0B – Timer/Counter Control Register B
+7 6 5 4 3 2 1 0
+FOC0A FOC0B – – WGM02 CS02 CS01 CS00
+
+Bit 7 – FOC0A: Force Output Compare A
+The FOC0A bit is only active when the WGM bits specify a non-PWM mode.
+
+Bit 6 – FOC0B: Force Output Compare B
+The FOC0B bit is only active when the WGM bits specify a non-PWM mode.
+
+Bit 3 – WGM02: Waveform Generation Mode
+
+Bits 2:0 – CS02:0: Clock Select
+
+CS02 CS01 CS00 Description
+0 0 0 No clock source (Timer/Counter stopped)
+0 0 1 clkI/O/(No prescaling)
+0 1 0 clkI/O/8 (From prescaler)
+0 1 1 clkI/O/64 (From prescaler)
+1 0 0 clkI/O/256 (From prescaler)
+1 0 1 clkI/O/1024 (From prescaler)
+1 1 0 External clock source on T0 pin. Clock on falling edge.
+1 1 1 External clock source on T0 pin. Clock on rising edge.
+
+TCNT0 – Timer/Counter Register
+TCNT0[7:0]
+
+OCR0A – Output Compare Register A
+
+OCR0B – Output Compare Register B
+
+TIMSK0 – Timer/Counter Interrupt Mask Register
+7 6 5 4 3 2 1 0
+– – – – – OCIE0B OCIE0A TOIE0
+
+Bit 2 – OCIE0B: Timer/Counter Output Compare Match B Interrupt Enable
+When the OCIE0B bit is written to one, and the I-bit in the Status Register is set, the Timer/Counter Compare
+Match B interrupt is enabled. The corresponding interrupt is executed if a Compare Match in Timer/Counter occurs,
+i.e., when the OCF0B bit is set in the Timer/Counter Interrupt Flag Register – TIFR0.
+
+Bit 1 – OCIE0A: Timer/Counter0 Output Compare Match A Interrupt Enable
+When the OCIE0A bit is written to one, and the I-bit in the Status Register is set
+i.e., when the OCF0A bit is set in the Timer/Counter 0 Interrupt Flag Register – TIFR0.
+
+Bit 0 – TOIE0: Timer/Counter0 Overflow Interrupt Enable
+When the TOIE0 bit is written to one, and the I-bit in the Status Register is set, the Timer/Counter0 Overflow inter-
+rupt is enabled. The corresponding interrupt is executed if an overflow in Timer/Counter0 occurs, i.e., when the
+TOV0 bit is set in the Timer/Counter 0 Interrupt Flag Register – TIFR0.
+
+TIFR0 – Timer/Counter 0 Interrupt Flag Register
+7 6 5 4 3 2 1 0
+– – – – – OCF0B OCF0A TOV0
+
+Bit 2 – OCF0B: Timer/Counter 0 Output Compare B Match Flag
+The OCF0B bit is set when a Compare Match occurs between the Timer/Counter and the data in OCR0B – Output
+Compare Register0 B. OCF0B is cleared by hardware when executing the corresponding interrupt handling vector.
+Alternatively, OCF0B is cleared by writing a logic one to the flag. When the I-bit in SREG, OCIE0B (Timer/Counter
+Compare B Match Interrupt Enable), and OCF0B are set, the Timer/Counter Compare Match Interrupt is executed.
+
+Bit 1 – OCF0A: Timer/Counter 0 Output Compare A Match Flag
+The OCF0A bit is set when a Compare Match occurs between the Timer/Counter0 and the data in OCR0A – Out-
+put Compare Register0.
+
+Bit 0 – TOV0: Timer/Counter0 Overflow Flag
+The bit TOV0 is set when an overflow occurs in Timer/Counter0.
+
+*==16 bit timer==*
+ Specifically how to use it in capture mode.
+ 
+ TCCR1A – Timer/Counter1 Control Register A
+7 6 5 4 3 2 1 0
+COM1A1 COM1A0 COM1B1 COM1B0 – – WGM11 WGM10
+
+Bit 7:6 – COM1A1:0: Compare Output Mode for Channel A
+Bit 5:4 – COM1B1:0: Compare Output Mode for Channel B
+COM1A1/COM1B1 COM1A0/COM1B0 Description
+0 0 Normal port operation, OC1A/OC1B disconnected.
+0 1 Toggle OC1A/OC1B on Compare Match.
+1 0 Clear OC1A/OC1B on Compare Match (Set output to
+   low level).
+1 1 Set OC1A/OC1B on Compare Match (Set output to
+   high level).
+
+Bit 1:0 – WGM11:0: Waveform Generation Mode
+Combined with the WGM13:2 bits found in the TCCR1B Register
+Mode WGM13 WGM12 WGM11 WGM10 Timer/Counter Mode of TOP Update of TOV1 Flag
+           (CTC1) (PWM11) (PWM10)Operation OCR1x at Set on
+0 0 0 0 0 Normal 0xFFFF Immediate MAX
+1 0 0 0 1 PWM, Phase Correct, 8-bit 0x00FF TOP BOTTOM
+2 0 0 1 0 PWM, Phase Correct, 9-bit 0x01FF TOP BOTTOM
+3 0 0 1 1 PWM, Phase Correct, 10-bit 0x03FF TOP BOTTOM
+4 0 1 0 0 CTC OCR1A Immediate MAX
+5 0 1 0 1 Fast PWM, 8-bit 0x00FF BOTTOM TOP
+6 0 1 1 0 Fast PWM, 9-bit 0x01FF BOTTOM TOP
+7 0 1 1 1 Fast PWM, 10-bit 0x03FF BOTTOM TOP
+8 1 0 0 0 PWM, Phase and Frequency ICR1 BOTTOM BOTTOM
+          Correct 
+9 1 0 0 1 PWM, Phase and Frequency OCR1A BOTTOM BOTTOM
+          Correct 
+10 1 0 1 0 PWM, Phase Correct ICR1 TOP BOTTOM
+11 1 0 1 1 PWM, Phase Correct OCR1A TOP BOTTOM
+12 1 1 0 0 CTC ICR1 Immediate MAX
+
+TCCR1B – Timer/Counter1 Control Register B
+7 6 5 4 3 2 1 0
+ICNC1 ICES1 – WGM13 WGM12 CS12 CS11 CS10
+
+Bit 7 – ICNC1: Input Capture Noise Canceler
+Setting this bit (to one) activates the Input Capture Noise Canceler. When the noise canceler is activated, the input
+from the Input Capture pin (ICP1) is filtered. The filter function requires four successive equal valued samples of
+the ICP1 pin for changing its output. 
+
+Bit 6 – ICES1: Input Capture Edge Select
+This bit selects which edge on the Input Capture pin (ICP1) that is used to trigger a capture event. When the ICES1
+bit is written to zero, a falling (negative) edge is used as trigger, and when the ICES1 bit is written to one, a rising
+(positive) edge will trigger the capture.
+When a capture is triggered according to the ICES1 setting, the counter value is copied into the Input Capture Reg-
+ister (ICR1). The event will also set the Input Capture Flag (ICF1), and this can be used to cause an Input Capture
+Interrupt, if this interrupt is enabled.
+When the ICR1 is used as TOP value (see description of the WGM13:0 bits located in the TCCR1A and the
+TCCR1B Register), the ICP1 is disconnected and consequently the Input Capture function is disabled.
+
+Bit 4:3 – WGM13:2: Waveform Generation Mode
+
+Bit 2:0 – CS12:0: Clock Select
+The three Clock Select bits select the clock source to be used by the Timer/Counter
+CS12 CS11 CS10 
+Description
+0 0 0 No clock source (Timer/Counter stopped).
+0 0 1 clkI/O/1 (No prescaling)
+0 1 0 clkI/O/8 (From prescaler)
+0 1 1 clkI/O/64 (From prescaler)
+1 0 0 clkI/O/256 (From prescaler)
+1 0 1 clkI/O/1024 (From prescaler)
+1 1 0 External clock source on T1 pin. Clock on falling edge.
+1 1 1 External clock source on T1 pin. Clock on rising edge.
+
+TCCR1C – Timer/Counter1 Control Register C
+7 6 5 4 3 2 1 0
+FOC1A FOC1B – – – – – –
+
+Bit 7 – FOC1A: Force Output Compare for Channel A
+Bit 6 – FOC1B: Force Output Compare for Channel B
+The FOC1A/FOC1B bits are only active when the WGM13:0 bits specifies a non-PWM mode. When writing a logi-
+cal one to the FOC1A/FOC1B bit, an immediate compare match is forced on the Waveform Generation unit. 
+
+TIMSK1 – Timer/Counter1 Interrupt Mask Register
+7 6 5 4 3 2 1 0
+– – ICIE1 – – OCIE1B OCIE1A TOIE1
+
+Bit 5 – ICIE1: Timer/Counter1, Input Capture Interrupt Enable
+Bit 2 – OCIE1B: Timer/Counter1, Output Compare B Match Interrupt Enable
+Bit 1 – OCIE1A: Timer/Counter1, Output Compare A Match Interrupt Enable
+Bit 0 – TOIE1: Timer/Counter1, Overflow Interrupt Enable
+
+TIFR1 – Timer/Counter1 Interrupt Flag Register
+7 6 5 4 3 2 1 0
+– – ICF1 – – OCF1B OCF1A TOV1
+
+Bit 5 – ICF1: Timer/Counter1, Input Capture Flag
+Bit 2 – OCF1B: Timer/Counter1, Output Compare B Match Flag
+Bit 1 – OCF1A: Timer/Counter1, Output Compare A Match Flag
+Bit 0 – TOV1: Timer/Counter1, Overflow Flag
