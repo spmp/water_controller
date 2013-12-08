@@ -13,7 +13,7 @@
 
 
 # ========== Edit below here ========= #
-SOURCES = main.c clock.c usart.c freq.c adc.c
+SOURCES = main.c clock.c usart.c freq.c adc.c temperature.c level.c
 PORT = /dev/ttyUSB*
 BAUD_RATE = 57600
 MCU = atmega328p

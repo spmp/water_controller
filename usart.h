@@ -1,7 +1,9 @@
 #pragma once
 #include <avr/io.h>
 
-/* Resources: USART */
+/* Resources: 	USART 
+ * 				Rx0, Tx1 pins on Arduino
+ */
 
 void init_usart();
 

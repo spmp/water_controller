@@ -15,39 +15,35 @@
  * Digital input ICP1/Arduino pin 8
  * 
  * */
-uint16_t currentICR;	/*May not need this if using second ISR method */
+uint16_t currentICR;	/* May not need this if using second ISR method */
 uint16_t previousICR;
 uint16_t diffICR;
 
-/*Input Capture ISR */
-ISR(TIMER1_CAPT_vect) { 
-	if ( (TIFR1 & (1 << TOV1)) == 0 ){
-       currentICR = ICR1; 
-       diffICR = currentICR  - previousICR;       //calc difference 
-       previousICR = ICR1;
-   }
-   else {
-	   currentICR = ICR1+65535; 
-       diffICR = currentICR  - previousICR;       //calc difference 
-       previousICR = ICR1;
-   }
-       
-       /* Second ISR method, works if ICR1 does not change during ISR */
-       //diffICR = ICR1 - previousICR;       //calc difference 
-       //previous = currentICR;             //update previous value 
- }
-
 /* Setup 16bit counter/timer */
 void init_freq() {
-	
-	/* Normal mode */
-	TCCR1B = (1 <<  ICES1) | (1 << CS10); /*Rising edge input capture, no pre-scalar */
-	TIMSK1 = (1 << ICIE1); /* Input capture interupt enable */
+    /* Normal mode (default, nothing required) */
+    TCCR1B = (1 <<  ICES1) | (1 << CS10); /*Rising edge input capture, no pre-scalar */
+    TIMSK1 = (1 << ICIE1); /* Input capture interrupt enable */
+}
+
+/* Input Capture ISR */
+ISR(TIMER1_CAPT_vect) { 
+    currentICR = ICR1;
+    /* Check if timer/counter1 has overflowed */
+    if ( (TIFR1 & (1 << TOV1)) == 0 ){ 
+       diffICR = currentICR  - previousICR;    /* calc difference */
+    }
+    else {
+    /* If overflowed calculate diff as followes */
+       diffICR = 65535 - previousICR + currentICR;
+       TIFR1 &= ~(1 << TOV1);
+    } 
+    previousICR = ICR1;    /* update previous value, even if changed during ISR. i.e. dont use currentICR */
 }
 
 /* Convert the edge delta to a frequency */
 uint16_t freq() {
-	uint16_t frequency;
-	frequency = ( F_CPU / (diffICR*FREQPRESCALE));
-	return frequency;
+    uint16_t frequency;
+    frequency = ( F_CPU / (diffICR*FREQPRESCALE));
+    return frequency;
 }

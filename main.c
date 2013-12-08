@@ -6,6 +6,9 @@
 #include "clock.h"
 #include "freq.h"
 #include "adc.h"
+#include "temperature.h"
+
+float temperatureAcalibrationparam = (298.15*5.0)/(2.982*1023);
 
 struct Inputs {
     //uint16_t distance;
@@ -31,11 +34,11 @@ void write_state_to_usart(struct Program *program) {
     send_char(' ');
     send_char('T');
     send_char(' ');
-    send_uint16(read_analog_pin(2));
+    send_uint16(read_analog_pin(3));
     send_char(' ');
     send_char('P');
     send_char(' ');
-    send_uint16(read_analog_pin(3));
+    send_uint16((uint16_t)water_temperature(read_analog_pin(3), temperatureAcalibrationparam));
     send_char(' ');
     send_char('F');
     send_char(' ');
