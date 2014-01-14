@@ -32,17 +32,17 @@ void write_state_to_usart(struct Program *program) {
     send_char(' ');
     send_uint16(timestamp & 0xFFFF);
     send_char(' ');
-    send_char('T');
+    send_char('D');
     send_char(' ');
-    send_uint16(read_analog_pin(3));
-    send_char(' ');
-    send_char('P');
-    send_char(' ');
-    send_uint16((uint16_t)water_temperature(read_analog_pin(3), temperatureAcalibrationparam));
-    send_char(' ');
-    send_char('F');
-    send_char(' ');
-    send_uint16(freq());
+    send_uint16(freqdiff());
+    //send_char(' ');
+    //send_char('P');
+    //send_char(' ');
+    //send_uint16((uint16_t)water_temperature(read_analog_pin(3), temperatureAcalibrationparam));
+    //send_char(' ');
+    //send_char('F');
+    //send_char(' ');
+    //send_uint16(freq());
   //  send_uint16(program->inputs.distance);
   //  send_char(' ');
   //  send_uint16(program->inputs.pot_value);
@@ -52,10 +52,12 @@ void write_state_to_usart(struct Program *program) {
 
 void loop(struct Program *program) {
     //program->inputs = read_inputs();
-    write_state_to_usart(program);
+    //write_state_to_usart(program);
+    handle_single_char_from_serial();
 
     //trigger_ultrasonic_measure();
-    _delay_ms(500);
+    //_delay_ms(1000);
+    _delay_ms(250);
 }
 
 void toggle_led() {

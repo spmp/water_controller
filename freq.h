@@ -14,3 +14,6 @@ void init_freq();
 /* Convert the current difference in time between rising edges to a
  * frequency in Hz*10  */
 uint16_t freq();
+
+/* Temproary for testing */
+uint16_t freqdiff();

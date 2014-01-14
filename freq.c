@@ -44,6 +44,11 @@ ISR(TIMER1_CAPT_vect) {
 /* Convert the edge delta to a frequency */
 uint16_t freq() {
     uint16_t frequency;
-    frequency = ( F_CPU / (diffICR*FREQPRESCALE));
+    frequency = ( (F_CPU/1000) / (diffICR*FREQPRESCALE))*1000;
     return frequency;
 }
+
+uint16_t freqdiff() {
+    return diffICR;
+}
+
