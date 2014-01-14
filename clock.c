@@ -1,9 +1,13 @@
 #include <avr/interrupt.h>
 #include "clock.h"
 
-void (* oncePerSecondCallback)();
+void (* oncePerSecondCallback)(); // void function pointer
 uint32_t timestamp;
 uint16_t ticks;
+
+void clock_set_seconds_callback(void (* secondsCallback)()) {
+    oncePerSecondCallback = secondsCallback;
+}
 
 ISR(TIMER2_COMPA_vect) {
     /* increment clock */

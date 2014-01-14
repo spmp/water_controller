@@ -3,9 +3,6 @@
 
 /* Resources: Timer/Counter 2 */
 
-/* callback that is called once every second. N.B. is called within an interrupt */
-extern void (* oncePerSecondCallback)();
-
 /* unix timestamp: seconds since epoch */
 extern uint32_t timestamp;
 
@@ -14,3 +11,5 @@ extern uint16_t ticks;
 
 void init_clock();
 
+/* callback that is called once every second. N.B. is called within an interrupt */
+void clock_set_seconds_callback(void (* secondsCallback)());

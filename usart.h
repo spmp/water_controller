@@ -20,8 +20,10 @@ void send_char(uint8_t byte);
 /* write a 16 bit integer to the usart in ascii decimal */
 void send_uint16(uint16_t num);
 
-/* write a char string to the usart */
-void send_char_string(char s[]);
+/* write a null-terminated string to the usart */
+void send_string(const char *s);
+
+void send_newline();
 
 /* Serial buffer size */
 int num_in_serial_buffer();
@@ -30,8 +32,9 @@ int num_in_serial_buffer();
  * and run line handler if so.*/
 void handle_single_char_from_serial();
 
+
 /* Parse the recieved line into command name and value */
-void handle_line(char* line);
+void handle_line(const char* line);
 
 /* Take action on command name and command value */
 void command_from_serial(char commandname, uint32_t commandvalue);

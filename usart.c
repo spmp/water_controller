@@ -33,13 +33,16 @@ void send_uint16(uint16_t num) {
     }
 }
 
-/* write a char string to the usart */
-void send_char_string(char s[]){
-    int j=0; 
-    while (s[j] != 0x00)
-    {
-        send_char(s[j++]);
-    } 
+/* write a null-terminated string to the usart */
+void send_string(const char *s) {
+    while (*s) {
+        send_char(*s++);
+    }
+}
+
+void send_newline() {
+    send_char('\r');
+    send_char('\n');
 }
 
 /* Handle USART reading. So much more _fun! */
@@ -50,7 +53,6 @@ ISR (USART_RX_vect) {
     } else {
         serial_buffer_count++;
     }
-    //UDR0 = 1;
 }
 
 /* blocks until chars have been received, return the last recieved byte */
@@ -73,30 +75,28 @@ int num_in_serial_buffer() {
 void handle_single_char_from_serial() {
     char next_char = serial_read();
     switch(next_char) {
+        case '\n':
         case '\r': // This is what the terminal sends as newline
             line_buffer[num_char] = '\0'; //terminate the line_buffer
             if (num_char > 0) { // Does the line contain any information
                 handle_line(line_buffer);
             }
             num_char = 0;
-            line_buffer[num_char] = '\0'; //clear the first and second characters
-            line_buffer[num_char+1] = '\0'; //command and argument
             break;
-        case '\n': // now we've got a full line, so we can process it further
-            line_buffer[num_char] = '\0'; //terminate the line_buffer
-            if (num_char > 0) { // Does the line contain any information
-                handle_line(line_buffer);
-            }
-            num_char = 0;
-            line_buffer[num_char] = '\0'; //clear the first and second characters
-            line_buffer[num_char+1] = '\0'; //command and argument
+        case '\0':
+            num_char = 0; // this shouldn't happen, but reset buffer anyway
             break;
         default: // save characters to line buffer
-            if ((num_char < MAX_LINE_LEN)&&(next_char!='\0')) //make sure that we dont overflow line buffer and that there is something to put in it.
+            if (num_char < MAX_LINE_LEN) // overflow check
                 line_buffer[num_char++] = next_char;
             break;
         }
 }
+
+/* TODO: move the functions below to outside usart.c (e.g. commands.c)
+   Make the handle_line() above a function-pointer which you
+   can set at the start of the program (see clock.h for an example)
+*/
 
 /* Parse null terminated string with expected format:
  * <single letter command><command value>
@@ -104,18 +104,13 @@ void handle_single_char_from_serial() {
  *  Strip and check command
  *  Check that command value is a number. (strtol() )
  */
-void handle_line(char* line) {
-    char * endptr = 0;
-    char argument_string[MAX_LINE_LEN] = {};
-    
-    //Separate argument and value
-    char argument = line[0];
-    strcpy(argument_string, line+1);
-    
-    //Check whether the argument is a number and if so proceed to logic
-    uint32_t argument_value = strtoul(line+1, &endptr, 0);
-    if(*endptr==0) {
-        command_from_serial(argument, argument_value);
+void handle_line(const char* line) {
+    char *endptr = 0;
+
+    //Check whether rest of line is a number and if so proceed to logic
+    uint32_t argument_value = strtoul(line+1, &endptr, 10);
+    if (*endptr == '\0') {
+        command_from_serial(line[0], argument_value);
     }
  }
 
@@ -159,3 +154,4 @@ void command_from_serial(char commandname, uint32_t commandvalue) {
             break;
     }
 }
+
