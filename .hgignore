@@ -1,5 +1,13 @@
 syntax: glob
 
+.hgignore~
+#Eagle backups
+#*.*\#*
+#*.b\#.
+
 .build/**
 *.swp
 outtakes.c
+
+syntax: regexp
+\.[s,d,b]\#\d

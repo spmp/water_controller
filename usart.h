@@ -1,8 +1,6 @@
 #pragma once
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <string.h>
-#include <stdlib.h>
 
 #define BUF_SIZE 20
 #define MAX_LINE_LEN 20
@@ -32,10 +30,5 @@ int num_in_serial_buffer();
  * and run line handler if so.*/
 void handle_single_char_from_serial();
 
-
-/* Parse the recieved line into command name and value */
-void handle_line(const char* line);
-
-/* Take action on command name and command value */
-void command_from_serial(char commandname, uint32_t commandvalue);
-
+/* Set function to call to handle the char string from serial */
+void usart_set_handle_char_string_from_serial(void (* handlecharstring)(const char*));
