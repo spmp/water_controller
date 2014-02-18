@@ -14,7 +14,7 @@ int num_char = 0;
 void init_usart() {
     UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1 << RXCIE0);
     UCSR0C = (1 << UCSZ00) | (1 << UCSZ01);
-    UBRR0 = F_CPU / 16 / 57600 - 1;
+    UBRR0 = F_CPU / 16 / BAUDE_RATE - 1;
 }
 
 void usart_set_handle_char_string_from_serial(void (* handlecharstring)(const char*)) {

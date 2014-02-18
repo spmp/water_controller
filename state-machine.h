@@ -3,6 +3,7 @@
 #include <avr/interrupt.h>
 #include "usart.h"
 #include "clock.h"
+#include "log.h"
 
 extern uint8_t read_inputs_flag;
 
@@ -56,6 +57,3 @@ void check_limits(struct Program *program);
 
 // Set calculated output states to hardware
 void update_outputs(struct Outputs *outputs);
-
-// Send logging data over serial
-void log_to_serial(struct Program *program);

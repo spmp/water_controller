@@ -1,8 +1,14 @@
 #include "command.h"
-/* TODO: move the functions below to outside usart.c (e.g. commands.c)
-   Make the handle_line() above a function-pointer which you
-   can set at the start of the program (see clock.h for an example)
-*/
+#include "temperature.h"
+#include "i2cmaster.h"
+#include "i2c_safe.h"
+#include "log.h"
+#include "clock.h"
+
+
+uint8_t eloaded;
+uint8_t wloaded;
+uint8_t Wloaded;
 
 /* Parse null terminated string with expected format:
  * <single letter command><command value>
@@ -18,45 +24,113 @@ void handle_line(const char* line) {
     if (*endptr == '\0') {
         command_from_serial(line[0], argument_value);
     }
- }
+}
 
 /* The Giant mess that is the commands from serial */
 void command_from_serial(char commandname, uint32_t commandvalue) {
     switch(commandname) {
+        //Help!
+        case 'h': //Disable logging
+            send_string("Help! Available commands."); send_newline();
+            send_char('\t'); send_string("l: disable logging"); send_newline();
+            send_char('\t'); send_string("L: enable logging"); send_newline();
+            send_char('\t'); send_string("b: boost! heat the tank to the set hotpoint immediatly"); send_newline();
+            send_char('\t'); send_string("f: Fill the water tank"); send_newline();
+            send_char('\t'); send_string("F: Fill the tank to specified litres"); send_newline();
+            send_char('\t'); send_string("t: current time (no parameter), or set time parameter in hhmmss"); send_newline();
+            send_char('\t'); send_string("p: disable the pump"); send_newline();
+            send_char('\t'); send_string("P: enable the pump"); send_newline();
+            send_newline();
+            break;
+        //logging
+        case 'l': //Disable logging
+            disable_logging();
+            send_string("Logging disabled, enable with 'L'.");
+            send_newline();
+            break;
+        case 'L': //Enable logging
+            enable_logging();
+            send_string("Logging enabled, disable with 'l'.");
+            send_newline();
+            break;
+            
+        //State machine
         case 'b': //boost - no commandvalue
-            send_char('B');
-            send_char('\r');
-            send_char('\n');
+            send_string("Boosting!");
+            send_newline();
+//             boost(1);
             break;
         case 'f': //fill the tank
-            send_char('F');
-            send_char('\r');
-            send_char('\n');
+            send_string("Filling!");
+            send_newline();
+//             fill(FULL);
             break;
         case 'F': //fill the tank to value in Litres or mm
-            send_char('f');
-            send_char(' ');
-            send_uint16((uint16_t)commandvalue);
-            send_char('\r');
-            send_char('\n');
+            send_string("Filling to ");
+            send_uint16(commandvalue);
+            send_string(" litres.");
+            send_newline();
+//             fill(commandvalue);
             break;
         case 't': //set the time
-            send_char('t');
-            send_char(' ');
-            send_uint16((uint16_t)commandvalue);
-            send_char('\r');
-            send_char('\n');
-            //timestamp = commandvalue;
+            if ( commandvalue == 0 ){
+                send_string("The time is: ");
+                send_uint16(timestamp);
+                send_newline();
+            }
+            else {
+                send_string("Setting the time to ");
+                send_uint16(commandvalue);
+                send_newline();
+                timestamp = commandvalue;
+            }
             break;
         case 'p': //disable pump
-            send_char('p');
-            send_char('\r');
-            send_char('\n');
+            send_string("Disabling the pump, enable with P.");
+            send_newline();
+//             pump(0);
             break;
         case 'P': //enable pump
-            send_char('P');
-            send_char('\r');
-            send_char('\n');
+            send_string("Enabling the pump, disable with p. ");
+            send_newline();
+//             pump(1);
             break;
+            
+        //Temperature sensors
+        case 'A': //Intitialise AT30TSE758
+            send_string("Initilaising AT30TSE758 sensor 1...");
+            send_newline();
+            if ( !init_AT30TSE758(TEMP_SENSOR1_ADDRESS) ){
+                send_string("Success.");
+            }
+            else {
+                send_string("Failed!");
+            }
+            send_newline();
+            send_string("Initilaising AT30TSE758 sensor 2...");
+            send_newline();
+            if ( !init_AT30TSE758(TEMP_SENSOR2_ADDRESS) ){
+                send_string("Success.");
+            }
+            else {
+                send_string("Failed!");
+            }
+            send_newline();
+            send_string("Initilaising AT30TSE758 sensor 3...");
+            send_newline();
+            if ( !init_AT30TSE758(TEMP_SENSOR3_ADDRESS) ){
+                send_string("Success.");
+            }
+            else {
+                send_string("Failed!");
+            }
+            send_newline();
+            break;
+        case 'T': //Display temperature
+            send_string("Temperature is: ");
+            send_uint16(temperature());
+            send_newline();
+            break;
+
     }
 }

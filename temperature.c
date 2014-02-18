@@ -1,55 +1,109 @@
 #include "temperature.h"
-#include "adc.h"
- 
-/*
- * In this implimentaion temperature is sampled using an
- * LM335 temperature sensor IC connected to an ADC channel.
- * 
- * The sensor is essentially a highly stable linear Zener diode. 
- *          Output (to ADC_IN)
- *            |
- * Vcc---R1------GND	Where R1 is calculated as:
- *            |			Resistor=(Vcc-3)*1000
- *          LM335-Adj.	In this application we use a 2k resistor
- *            |
- *           GND
- * 
- *  The LM335 gives 0.01V per °K.
- *  Calibrate to correct for slope error
- *  Vout_T= Vout_T0 * T / T_0
- *  Vout  = (Vref/1024) * ADC
- *  Temp  = Vout/10 in K = Vout/10 - 273.15 in °C.
- *  Vcal  = (T0/Vout_T0)  this soaks up the 10mv/°C
- *  T_cal = Vout*Vcal - 273.15 
- * 
- * With an 10bit ADC we get 0.488 degree resolution. Good enough.
- *
- * Now, how to do all this with 16bit integers and no floats!
- *  First step is make temperature=temperature*100 to give two
- *  dp accuracy - make this 1000 if this is needed....
- * 
+
+#include <avr/io.h>
+#include "i2c_safe.h"
+#include "usart.h"
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
+/** @brief      Temperate measure, hardware agnostic abstraction
+ *    @retval     temperature Temperate in °Cx1000
  */
+int16_t temperature(void){
+    /*Strategies for temperature measurment from three sensors:
+     1.    Use only highest sensor -- requires level
+     2.    Average all submerged sensors -- requires level
+     3.    Average all sensors
+     4.    Use the maximal value
+     5.    Average all sensors within some error of maximum
+     */ 
+    uint16_t temp1 = read_AT30TSE758(TEMP_SENSOR1_ADDRESS);
+    uint16_t temp2 = 0; //read_AT30TSE758(TEMP_SENSOR2_ADDRESS);
+    uint16_t temp3 = 0; //read_AT30TSE758(TEMP_SENSOR3_ADDRESS);
+//1.
 
+//2.
 
-/* Calibrate the temperature sensor at known temperature in °C*/
- float calibrate_temperature(uint8_t calibrationtemp, uint8_t temppin){
-    float calibrationparameter;
-    calibrationparameter = ( (float)calibrationtemp -273.15) / (float)read_analog_pin(temppin);
-    return calibrationparameter;
- }
+//3.
+    uint16_t temp_avr = ((temp1+temp2+temp3)/3);
+//4.
+    uint16_t temp_max = MAX(temp3,MAX(temp1,temp2));
+//5.
+//     uint16_t temp_graded_average = ;
+//     return temp_max;
+    return temp1;
 
-/* Water temperature in floating point °C */
- float water_temperature_f(uint16_t adctemperature, float calibrationparameter){
-    float watertemp;
-    watertemp = calibrationparameter * (float)adctemperature - 273.15;
-    return watertemp;
- }
- 
-/* Water temperature in signed integer °C, -128->128°C*/
- int8_t water_temperature(uint16_t adctemperature, float calibrationparameter){
-    float watertemp;
-    watertemp = calibrationparameter * (float)adctemperature - 273.15;
-    return (int8_t)watertemp;
- }
- 
+}
+
+/** @brief      The change in temperature over one second
+    @retval     delta_t The change in temperature over one second in °Cx1000
+*/
+uint8_t deltat(void);
+
+/* Hardware specific routines */
+
+/***********AT30TSE758************
+ * I2C temperature sensor and
+ * eeeprom.
+ * Adress range         0b1001XXX
+ * Temperate reg.       0x00
+ * Configuration reg.   0x01
+ * NVRam config reg.    0x11
+ ********************************/
+
+/** @brief      Initialise AT30TSE758. Only needed once per device.
+    @details    Set config and NVRam registers. Only needs to be run once per device, as the NVRam settings are loaded on power up.
+                Configuration word is taken from AT30TSE758_INIT
+    @param      address I2C address of the AT30TSE758
+    @retval     0       Success, configuration and NVRam registers updated
+    @retval     1       Failure , configuration and NVRam registers not correctly updated! Check their state!
+    @retval     2       NVRam write failed. OMG!
+*/
+uint8_t init_AT30TSE758(uint8_t address){
+    uint8_t error = 0;
+    // Do we need to write the changes -- If register = AT30TSE758_INIT then do nothing
+    send_string("Reading config from address: ");
+    send_uint16(address);
+    send_newline();
+    
+    //Write config register, Error on no device.
+    if( i2c_safe_write_word(address, AT30TSE758_CONFIG_REG, AT30TSE758_INIT)){
+        return 1;
+    }
+    
+    //Check whether the config register is set to the initialisation parameter.
+    if ( !(i2c_safe_read_word(address, AT30TSE758_CONFIG_REG) == AT30TSE758_INIT) ){
+        return 3;
+    }
+    
+    //Write NVRam, padding for 16bit, error on no device.
+    if ( i2c_safe_write_sixteen(address, AT30TSE758_NVRAM_REG,(AT30TSE758_INIT << 8)& 0xFFFF) != 0 ){
+        return 4;
+    }
+    
+    //Check if NVRam matches initialisation parameter
+    if ( i2c_safe_read_sixteen(address, AT30TSE758_NVRAM_REG) != (AT30TSE758_INIT << 8)& 0xFFFF ){
+        return 5;
+    }
+    return 0;
+}
+
+/** @brief      Read temperature from an AT30TSE758 device
+    @details    Temperature based on 11bits, first bit is sign (1 negative), then 10 temperature bits
+                10 bit value is then shifted right 5 bits and multiplied by 0.125 to get °C. 
+    @param      address         I2C address of the AT30TSE758
+    @retval     temperature     in °Cx1000, or
+    @retval     0xFFFF          if read failed
+*/
+int16_t read_AT30TSE758(uint8_t address){
+    uint16_t tempraw = i2c_safe_read_sixteen(address, 0x0);
+    if ( tempraw >= 0x8000 ) { //Temperature is negative
+        return ( -((tempraw & 0x7FFF)>>5)*125);
+    }
+    else {
+        return ( (tempraw>>5)*125);
+    }
+    return tempraw;
+}
 

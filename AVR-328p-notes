@@ -367,3 +367,35 @@ Bit 5 – ICF1: Timer/Counter1, Input Capture Flag
 Bit 2 – OCF1B: Timer/Counter1, Output Compare B Match Flag
 Bit 1 – OCF1A: Timer/Counter1, Output Compare A Match Flag
 Bit 0 – TOV1: Timer/Counter1, Overflow Flag
+
+
+
+I2C
+-=========-
+Lets just get something done fffSake!!!
+ Prescaler for SCL frequency
+Table 22-7.
+TWI Bit Rate Prescaler
+TWPS1 TWPS0 Prescaler Value
+0 0 1
+0 1 4
+1 0 16
+1 1 64
+in TWSR, bit 1 and 0 respectivly
+
+Example of setting bus speed IE set TWBR to TWBR_val
+#define TWBR_val ((((F_CPU / F_SCL) / Prescaler) - 16 ) / 2)
+
+22.6
+Using the TWI
+The AVR TWI is byte-oriented and interrupt based. Interrupts are issued after all bus events, like reception of a
+byte or transmission of a START condition. Because the TWI is interrupt-based, the application software is free to
+carry on other operations during a TWI byte transfer. Note that the TWI Interrupt Enable (TWIE) bit in TWCR
+together with the Global Interrupt Enable bit in SREG allow the application to decide whether or not assertion of the
+TWINT Flag should generate an interrupt request. If the TWIE bit is cleared, the application must poll the TWINT
+Flag in order to detect actions on the TWI bus.
+When the TWINT Flag is asserted, the TWI has finished an operation and awaits application response. In this
+case, the TWI Status Register (TWSR) contains a value indicating the current state of the TWI bus. The application
+software can then decide how the TWI should behave in the next TWI bus cycle by manipulating the TWCR and
+TWDR Registers.
+

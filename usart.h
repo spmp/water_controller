@@ -2,9 +2,17 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define BUF_SIZE 20
-#define MAX_LINE_LEN 20
+#ifndef BAUDE_RATE
+#define BAUDE_RATE 57600
+#endif
 
+#ifndef BUF_SIZE 20
+#define BUF_SIZE 20
+#endif
+
+#ifndef MAX_LINE_LEN
+#define MAX_LINE_LEN 20
+#endif
 
 /* Resources: 	USART 
  * 				Rx0, Tx1 pins on Arduino

@@ -13,7 +13,8 @@
 
 
 # ========== Edit below here ========= #
-SOURCES = main.c clock.c usart.c freq.c adc.c temperature.c level.c command.c state-machine.c
+SOURCES = main.c clock.c usart.c freq.c adc.c temperature.c level.c command.c state-machine.c i2c_safe.c log.c
+# ASRC = i2cmaster.S
 PORT = /dev/ttyUSB*
 BAUD_RATE = 57600
 MCU = atmega328p
@@ -35,6 +36,9 @@ CFLAGS = -c -g -Os -Wall -w -ffunction-sections -fdata-sections -mmcu=$(MCU) \
 CPPFLAGS = $(CFLAGS) -fno-exceptions
 LDFLAGS = -Os -Wl,--gc-sections -mmcu=$(MCU) -lm
 HEXFLAGS = -O ihex -R .eeprom
+
+#Added by Me 8)
+# ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 
 PROG_OBJ = $(addprefix $(WORKDIR)/, $(SOURCES:.c=.o))
 
