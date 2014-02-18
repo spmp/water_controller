@@ -12,7 +12,7 @@
 
 // I2C sensor addresses
 #ifndef TEMP_SENSOR1_ADDRESS
-#define TEMP_SENSOR1_ADDRESS    0x48 //0x4C // 1001100
+#define TEMP_SENSOR1_ADDRESS    0x4C // 1001100
 #endif
 #ifndef TEMP_SENSOR2_ADDRESS
 #define TEMP_SENSOR2_ADDRESS    0x4E // 1001110

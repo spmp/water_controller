@@ -12,7 +12,7 @@
 #include "temperature.h"
 #include "command.h"
 #include "state-machine.h"
-#include "i2cmaster.h"
+#include "i2c_safe.h"
 
 float temperatureAcalibrationparam = (298.15*5.0)/(2.982*1023);
 

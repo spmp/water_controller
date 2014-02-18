@@ -1,6 +1,5 @@
 #include "command.h"
 #include "temperature.h"
-#include "i2cmaster.h"
 #include "i2c_safe.h"
 #include "log.h"
 #include "clock.h"
@@ -129,6 +128,31 @@ void command_from_serial(char commandname, uint32_t commandvalue) {
         case 'T': //Display temperature
             send_string("Temperature is: ");
             send_uint16(temperature());
+            send_newline();
+            break;
+        case 'S':
+            send_string("Scanning I2C bus in read mode: ");
+            send_newline();
+            i2c_safe_write_scan_bus(0x00, 0x7F);
+            send_string("Scanning I2C bus in read mode: ");
+            send_newline();
+            i2c_safe_read_scan_bus(0x00, 0x7F);
+            send_newline();
+            send_string("completed");
+            send_newline();
+            break;
+        case 'R': //testing i2c_safe_read_sixteen
+            send_string("I2C safe: Reading 16 bits from register 0x0, from address:");
+            send_uint16(commandvalue);
+            send_newline();
+            send_uint16(i2c_safe_read_sixteen(commandvalue, 0x0) );
+            send_newline();
+            break;
+        case 'Z': //testing read_AT30TSE758
+            send_string("read_AT30TSE758 , from address:");
+            send_uint16(commandvalue);
+            send_newline();
+            send_uint16(read_AT30TSE758(commandvalue));
             send_newline();
             break;
 
