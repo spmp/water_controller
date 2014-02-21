@@ -71,16 +71,25 @@ uint8_t init_AT30TSE758(uint8_t address){
     if( i2c_safe_write_word(address, AT30TSE758_CONFIG_REG, AT30TSE758_INIT)){
         return 1;
     }
+    send_string("writing config to address: ");
+    send_uint16(address);
+    send_newline();
     
     //Check whether the config register is set to the initialisation parameter.
     if ( !(i2c_safe_read_word(address, AT30TSE758_CONFIG_REG) == AT30TSE758_INIT) ){
         return 3;
     }
+    send_string("Reading NVRam from address: ");
+    send_uint16(address);
+    send_newline();
     
     //Write NVRam, padding for 16bit, error on no device.
     if ( i2c_safe_write_sixteen(address, AT30TSE758_NVRAM_REG,(AT30TSE758_INIT << 8)& 0xFFFF) != 0 ){
         return 4;
     }
+    send_string("Writing NVRam to address: ");
+    send_uint16(address);
+    send_newline();
     
     //Check if NVRam matches initialisation parameter
     if ( i2c_safe_read_sixteen(address, AT30TSE758_NVRAM_REG) != (AT30TSE758_INIT << 8)& 0xFFFF ){

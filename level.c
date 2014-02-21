@@ -16,7 +16,9 @@ uint16_t level( void ){
                 profile of the tank.
     @retval     water_volume in milli litres
 */
-uint16_t volume( void );
+uint16_t volume( void ){
+    return 0;
+}
 
 
 /***** Hardware Specific! *****

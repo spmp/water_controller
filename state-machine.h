@@ -5,7 +5,8 @@
 #include "clock.h"
 #include "log.h"
 
-extern uint8_t read_inputs_flag;
+extern uint8_t begin_state_machine_flag;
+extern uint8_t state_machine_running_flag;
 
 struct Inputs {
     /* This pair of values is for handling of inputs that take a long time to

@@ -1,19 +1,20 @@
 #include "state-machine.h"
 
-uint8_t read_inputs_flag = 0;
+uint8_t begin_state_machine_flag = 0;
+uint8_t state_machine_running_flag = 0;
 
 /* This is the STATE MACHINE
- * It will resmble a PLC in that it will do the following:
+ * It will resemble a PLC in that it will do the following:
  *  Read inputs into input state buffer
  *  Take action based on input state buffer, writing changes to temporary buffer (ie HW state)
  *  Check limit/emergency conditions (modify HW state as need be)
  *  Set outputs
  * 
- * This is not a good flow for critical real time control which this is not.
+ * This is not a good flow for critical real time control.
  * 
- * This must be as hardware agnostic as possible, shilst being application
+ * This must be as hardware agnostic as possible, whilst being application
  * specific.
- *  For example if we are measuring light levels as fara as the state
+ *  For example if we are measuring light levels as far as the state
  * machine is concerned we do not care how you get the measurement, just
  * that we can.
  */ 
@@ -36,16 +37,19 @@ struct Program;
  * struct program as we may desire to run different programs in the 
  * future, or switch program or whatever */
 void state_machine(struct Program *program) {
-    while (num_in_serial_buffer()) { //check whether there is anything on the serial buffer, if there is, look at it
-        handle_single_char_from_serial();
+    //:BRENDAN Is this nescesarry? I think there is no way we could run it twice unles we had multicore etc.
+    if (state_machine_running_flag ) { //make sure only one instance of the state machine is running
+        return;
     }
+    state_machine_running_flag = 1; // The state machine is running
+    
 
-    if (read_inputs_flag) { //if its time to read inputs, do it!
-        read_inputs_flag = 0;
-
-        read_inputs(&program->inputs);
-        PORTB ^= (1 << PORTB5);
-    }
+//     if (read_inputs_flag) { //if its time to read inputs, do it!
+//         read_inputs_flag = 0;
+// 
+//         read_inputs(&program->inputs);
+//         PORTB ^= (1 << PORTB5);
+//     }
 
     /* this will be true when all long-running measurements are complete */
     if (program->inputs.reading_inputs && !program->inputs.waiting_on_inputs) {
@@ -56,9 +60,9 @@ void state_machine(struct Program *program) {
         check_limits(program); //Check whether any safety or limit conditions are breached and adjust program.outputs accordingly
         
         update_outputs(&program->outputs); // Set the outputs 
-
-        log_to_serial(program); //send a log message
+        
     }
+    state_machine_running_flag = 0; //the state machine is finished
 }
 
 // Read the inputs, triggered by read_inputs_flag 

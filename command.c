@@ -3,6 +3,8 @@
 #include "i2c_safe.h"
 #include "log.h"
 #include "clock.h"
+#include "level.h"
+#include <util/delay.h>
 
 
 uint8_t eloaded;
@@ -43,14 +45,16 @@ void command_from_serial(char commandname, uint32_t commandvalue) {
             break;
         //logging
         case 'l': //Disable logging
-            disable_logging();
-            send_string("Logging disabled, enable with 'L'.");
-            send_newline();
-            break;
-        case 'L': //Enable logging
-            enable_logging();
-            send_string("Logging enabled, disable with 'l'.");
-            send_newline();
+            if (commandvalue != 1){
+                disable_logging();
+                send_string("Logging disabled, enable with 'l1'.");
+                send_newline();
+            }
+            else {
+                enable_logging();
+                send_string("Logging enabled, disable with 'l'.");
+                send_newline();
+            }
             break;
             
         //State machine
@@ -130,6 +134,22 @@ void command_from_serial(char commandname, uint32_t commandvalue) {
             send_uint16(temperature());
             send_newline();
             break;
+            
+            //Level and volume
+        case 'L': //Display level
+            send_string("Level is: ");
+            send_uint16(level());
+            send_string("mm");
+            send_newline();
+            break;
+        case 'V': //Display volume
+            send_string("Volume is: ");
+            send_uint16(volume());
+            send_string("L");
+            send_newline();
+            break;
+        ////////////////////////////////////////////////    
+        //I2C related and debugging
         case 'S':
             send_string("Scanning I2C bus in read mode: ");
             send_newline();
@@ -153,6 +173,53 @@ void command_from_serial(char commandname, uint32_t commandvalue) {
             send_uint16(commandvalue);
             send_newline();
             send_uint16(read_AT30TSE758(commandvalue));
+            send_newline();
+            break;
+        case 'X': //testing read_MCP3221
+            send_string("read_MCP3221 from pressure sensor. code is:");
+            send_uint16(read_MCP3221());
+            send_newline();
+            break;
+        case 'C': //Go Crazy!
+            send_string("Going Crazy on level!!!");
+            uint16_t poo;
+            uint16_t fart;
+            poo =10000;
+            fart = read_MCP3221(); //give us 8x origina reading
+            while (poo > 0){
+                //Use averaging over 8 numbers
+                fart = ((fart*7 + read_MCP3221() )>>3);
+                send_uint16(fart);
+                send_newline();
+                _delay_ms(250);
+                poo--;
+            }
+            break;
+        case 'B': //Go Crazy!
+            send_string("Going Crazy on temperature!!!");
+            uint16_t wee;
+            wee =10000;
+            while (wee > 0){
+                send_uint16(temperature());
+                send_newline();
+                poo--;
+            }
+            break;
+        case 'v':
+            send_string("reading i2c_safe_sixteen with adress");
+            send_uint16(wloaded);
+            send_string(", and register ");
+            send_uint16(commandvalue);
+            send_newline();
+            send_uint16(i2c_safe_read_sixteen(wloaded, commandvalue));
+            send_newline();
+            break;
+            // data to write to register
+        case 'w':
+            wloaded = commandvalue ;
+            send_string("Loading data: ");
+            send_uint16(wloaded);
+            send_string(" ready to write.");
             send_newline();
             break;
 
