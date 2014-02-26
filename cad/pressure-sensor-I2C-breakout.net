@@ -1,0 +1,123 @@
+# EESchema Netlist Version 1.1 created  Mon 24 Feb 2014 12:05:47 NZDT
+(
+ ( /530999F2 $noname  P2 CONN_4 {Lib=CONN_4}
+  (    1 Vss )
+  (    2 /SCL )
+  (    3 /SDA )
+  (    4 GND )
+ )
+ ( /530997F9 $noname  P1 CONN_4 {Lib=CONN_4}
+  (    1 Vss )
+  (    2 /SCL )
+  (    3 /SDA )
+  (    4 GND )
+ )
+ ( /5309976E $noname  C4 0.1uF {Lib=C}
+  (    1 Vss )
+  (    2 GND )
+ )
+ ( /53099624 $noname  C3 0.33uF {Lib=C}
+  (    1 N-000006 )
+  (    2 GND )
+ )
+ ( /5309961B $noname  C1 1uF {Lib=C}
+  (    1 Vss )
+  (    2 GND )
+ )
+ ( /5309943C $noname  C2 0.01uF {Lib=C}
+  (    1 Vss )
+  (    2 GND )
+ )
+ ( /53099200 $noname  R1 750 {Lib=R}
+  (    1 N-000004 )
+  (    2 N-000006 )
+ )
+ ( /5309912A $noname  U2 LTC2483 {Lib=LTC2483}
+  (    1 Vss )
+  (    2 Vss )
+  (    3 GND )
+  (    4 N-000006 )
+  (    5 GND )
+  (    6 /SCL )
+  (    7 /SDA )
+  (    8 GND )
+  (    9 GND )
+  (   10 Vss )
+ )
+ ( /53099121 $noname  U1 MPXV-PRESSURE-SENSOR {Lib=MPXV-PRESSURE-SENSOR}
+  (    2 Vss )
+  (    3 GND )
+  (    4 N-000004 )
+ )
+)
+*
+{ Allowed footprints by component:
+$component C4
+ SM*
+ C?
+ C1-1
+$endlist
+$component C3
+ SM*
+ C?
+ C1-1
+$endlist
+$component C1
+ SM*
+ C?
+ C1-1
+$endlist
+$component C2
+ SM*
+ C?
+ C1-1
+$endlist
+$component R1
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$endfootprintlist
+}
+{ Pin List by Nets
+Net 1 "/SCL" "SCL"
+ P1 2
+ P2 2
+ U2 6
+Net 2 "/SDA" "SDA"
+ U2 7
+ P2 3
+ P1 3
+Net 3 "Vss" "Vss"
+ C2 1
+ C1 1
+ U2 1
+ U2 2
+ P2 1
+ C4 1
+ P1 1
+ U2 10
+ U1 2
+Net 4 "" ""
+ R1 1
+ U1 4
+Net 5 "GND" "GND"
+ C4 2
+ P2 4
+ P1 4
+ C2 2
+ C1 2
+ C3 2
+ U2 5
+ U2 8
+ U2 9
+ U1 3
+ U2 3
+Net 6 "" ""
+ C3 1
+ U2 4
+ R1 2
+}
+#End

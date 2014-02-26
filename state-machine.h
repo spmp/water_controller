@@ -1,41 +1,70 @@
 #pragma once
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "usart.h"
-#include "clock.h"
-#include "log.h"
+#include "hardware.h"
 
 extern uint8_t begin_state_machine_flag;
 extern uint8_t state_machine_running_flag;
 
+//Needed as a non program related flag as program could change but fill state should not
+extern uint8_t filling_flag;
+
 struct Inputs {
-    /* This pair of values is for handling of inputs that take a long time to
-    obtain.
-
-    For example, it might be 50ms between when you ask for a level measurement
-    and you actually get the value. $reading_inputs is set to 1 when you've
-    just asked for various measurements to be taken. $waiting_on_inputs is set
-    to the number of measurements that take some time to calculate.
-
-    When a measurement is finally calculated, it's value is stored in the
-    Inputs struct, and $waiting_on_inputs is decremented. Thus when
-    $reading_inputs = 1 and $waiting_on_inputs = 0, we've got all of
-    our inputs and are ready to process them further.
-    */
-    uint8_t reading_inputs;
+    
+    uint8_t reading_inputs;     //This pair of values is for handling of inputs that take a long time to obtain.
     uint8_t waiting_on_inputs;
-
+    
+    /* These values contain the input metrics for the state machine */
     uint16_t temperature; // degrees celcius (C)
     uint16_t level; // height (mm)
     uint16_t volume; // Litres
+    
 };
 
 struct Outputs {
-    /* TODO: fill me in */
+    /* Pump state, on or off */
+    uint8_t pump;
+    /* Fill state, on or off */
+    uint8_t fill;
+    /* Heating state */
+    uint8_t heater;
+    /* Heater 1 state */
+    uint8_t heat1;
+    /* Heater 2 start */
+    uint8_t heat2;
+    /* Intermediary states */
+    uint8_t filling;    // Is the system filling? This could be acertained by the fill output state... may go soon!
+    uint8_t heating;
+//     uint8_t boosting;
 };
 
 struct Settings {
-    /* TODO: fill me in */
+    /* Time settings */
+    uint32_t time_to_hot_1;     // Time (1) to have tank at set temp by
+    uint32_t time_to_hot_2;     // Time (2) to have tank at set temp by
+    uint32_t midsun;            // Time at which the sun was/is at its peak
+    /* Level settings */
+    uint16_t level_full;        // The level of a full tank. Do not exceed 8) // possibly hard wired
+    uint16_t level_heater_min;  // The minimum safe level for running the heating elements
+    uint16_t level_min;         // The minimum allowable level of water in the tank
+    uint16_t level_fill;        // The level to fill the tank to
+    /* Volume settings */
+//     uint16_t 
+    /* Temperature settings */
+    uint8_t temperature_settemp;
+    uint8_t temperature_set_1;  // The temperature to which the system will automatically be heated
+    uint8_t temperature_set_2;
+    uint8_t temperature_min;    // Minimum temperature to maintain
+    /* Smarts */
+    uint16_t daily_heat_potential;      // How much energy to expect in a day
+    /* Output settings */
+    uint8_t pump_enable;
+    uint8_t fill_enable;
+    uint8_t heater_enable;
+    /* Intermediate states */
+    uint8_t fill_now;
+    uint8_t boost_now;
+    /* Configuration settings */
 };
 
 struct Program {
@@ -44,11 +73,13 @@ struct Program {
     struct Settings settings;
 };
 
+extern struct Program program;
+
 // The state machine
 void state_machine(struct Program *program);
 
 // Read the inputs, triggered by read_inputs_flag 
-void read_inputs(struct Inputs *inputs);
+void get_state(struct Program *program);
 
 // Calculate state changes to outputs
 void calculate_outputs(struct Program *program);

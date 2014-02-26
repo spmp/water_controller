@@ -13,8 +13,7 @@
 
 
 # ========== Edit below here ========= #
-SOURCES = main.c clock.c usart.c freq.c adc.c temperature.c level.c command.c state-machine.c i2c_safe.c log.c
-# ASRC = i2cmaster.S
+SOURCES = main.c clock.c usart.c freq.c adc.c temperature.c level.c command.c state-machine.c i2c_safe.c log.c hardware.c pump.c fill.c heat.c
 PORT = /dev/ttyUSB*
 BAUD_RATE = 57600
 MCU = atmega328p

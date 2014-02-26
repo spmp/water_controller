@@ -11036,9 +11036,9 @@ drill 1.1 mm</description>
 <label x="81.28" y="5.08" size="1.778" layer="95" rot="MR0" xref="yes"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="D5/T1"/>
-<wire x1="-58.42" y1="58.42" x2="-60.96" y2="58.42" width="0.1524" layer="91"/>
-<label x="-60.96" y="58.42" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="U$1" gate="G$1" pin="D6/AIN0"/>
+<wire x1="-58.42" y1="53.34" x2="-60.96" y2="53.34" width="0.1524" layer="91"/>
+<label x="-60.96" y="53.34" size="1.778" layer="95" rot="MR0" xref="yes"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -11142,9 +11142,9 @@ drill 1.1 mm</description>
 <label x="81.28" y="35.56" size="1.778" layer="95" rot="MR0" xref="yes"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="D4/T0/XCK"/>
-<wire x1="-58.42" y1="63.5" x2="-60.96" y2="63.5" width="0.1524" layer="91"/>
-<label x="-60.96" y="63.5" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="U$1" gate="G$1" pin="D5/T1"/>
+<wire x1="-58.42" y1="58.42" x2="-60.96" y2="58.42" width="0.1524" layer="91"/>
+<label x="-60.96" y="58.42" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="P" class="0">
@@ -11238,9 +11238,9 @@ drill 1.1 mm</description>
 <label x="78.74" y="96.52" size="1.778" layer="95" rot="MR0" xref="yes"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="D12/MISO"/>
-<wire x1="-58.42" y1="22.86" x2="-60.96" y2="22.86" width="0.1524" layer="91"/>
-<label x="-60.96" y="22.86" size="1.778" layer="95" rot="MR0" xref="yes"/>
+<pinref part="U$1" gate="G$1" pin="D7/AIN1"/>
+<wire x1="-58.42" y1="48.26" x2="-63.5" y2="48.26" width="0.1524" layer="91"/>
+<label x="-63.5" y="48.26" size="1.778" layer="95" rot="MR0" xref="yes"/>
 </segment>
 </net>
 <net name="N$5" class="0">

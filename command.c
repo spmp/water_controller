@@ -5,6 +5,7 @@
 #include "clock.h"
 #include "level.h"
 #include <util/delay.h>
+#include "state-machine.h"
 
 
 uint8_t eloaded;
@@ -23,12 +24,17 @@ void handle_line(const char* line) {
     //Check whether rest of line is a number and if so proceed to logic
     uint32_t argument_value = strtoul(line+1, &endptr, 10);
     if (*endptr == '\0') {
-        command_from_serial(line[0], argument_value);
+        command_from_serial(line[0], argument_value, &program);
     }
 }
 
 /* The Giant mess that is the commands from serial */
-void command_from_serial(char commandname, uint32_t commandvalue) {
+void command_from_serial(char commandname, uint32_t commandvalue, struct Program *program) {
+    
+    
+    struct Inputs *inputs = &program->inputs;
+    struct Settings *settings = &program->settings;
+    
     switch(commandname) {
         //Help!
         case 'h': //Disable logging
@@ -58,23 +64,8 @@ void command_from_serial(char commandname, uint32_t commandvalue) {
             break;
             
         //State machine
-        case 'b': //boost - no commandvalue
-            send_string("Boosting!");
-            send_newline();
-//             boost(1);
-            break;
-        case 'f': //fill the tank
-            send_string("Filling!");
-            send_newline();
-//             fill(FULL);
-            break;
-        case 'F': //fill the tank to value in Litres or mm
-            send_string("Filling to ");
-            send_uint16(commandvalue);
-            send_string(" litres.");
-            send_newline();
-//             fill(commandvalue);
-            break;
+            
+        //Time
         case 't': //set the time
             if ( commandvalue == 0 ){
                 send_string("The time is: ");
@@ -88,15 +79,59 @@ void command_from_serial(char commandname, uint32_t commandvalue) {
                 timestamp = commandvalue;
             }
             break;
+            
+        //Temperature
+        case 'T': //Display temperature
+            send_string("Temperature is: ");
+            send_uint16(temperature());
+            send_newline();
+            break;
+            
+        //Level and volume
+        case 'L': //Display level
+            send_string("Level is: ");
+            send_uint16(level());
+            send_string("mm");
+            send_newline();
+            break;
+        case 'V': //Display volume
+            send_string("Volume is: ");
+            send_uint16(volume());
+            send_string("L");
+            send_newline();
+            break;
+            
+        //Pump 
         case 'p': //disable pump
             send_string("Disabling the pump, enable with P.");
             send_newline();
-//             pump(0);
+            settings->pump_enable = 0;
             break;
         case 'P': //enable pump
             send_string("Enabling the pump, disable with p. ");
             send_newline();
-//             pump(1);
+            settings->pump_enable = 1;
+            break;
+        
+        //Fill
+        case 'f': //fill the tank
+            settings->fill_now = 1;
+            send_string("Filling!");
+            send_newline();
+            break;
+        case 'F': //fill the tank to value in Litres or mm
+            send_string("Setting fill level to ");
+            send_uint16(commandvalue);
+            send_string(" litres. Fill the tank with f.");
+            send_newline();
+            //             fill(commandvalue);
+            break;
+        
+        //Heat
+        case 'b': //boost - no commandvalue
+            send_string("Boosting!");
+            send_newline();
+//             boost(1);
             break;
             
         //Temperature sensors
@@ -129,25 +164,7 @@ void command_from_serial(char commandname, uint32_t commandvalue) {
             }
             send_newline();
             break;
-        case 'T': //Display temperature
-            send_string("Temperature is: ");
-            send_uint16(temperature());
-            send_newline();
-            break;
             
-            //Level and volume
-        case 'L': //Display level
-            send_string("Level is: ");
-            send_uint16(level());
-            send_string("mm");
-            send_newline();
-            break;
-        case 'V': //Display volume
-            send_string("Volume is: ");
-            send_uint16(volume());
-            send_string("L");
-            send_newline();
-            break;
         ////////////////////////////////////////////////    
         //I2C related and debugging
         case 'S':

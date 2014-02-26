@@ -36,17 +36,18 @@
 #endif
 
 #ifndef I2C_SAFE_READ_ERROR_CODE
-#define I2C_SAFE_READ_ERROR_CODE 0xFF
+#define I2C_SAFE_READ_ERROR_CODE 0x00
 #endif
 
 
 
 /**
     @brief initialize the I2C master interace. Need to be called only once 
-    @param  void
+    @param  I2Cfreq, the frequqncy of the ITC port in Hz
+    @param  Fcpu, micro clock speed in Hz
     @return none
 */
-extern void i2c_init(void);
+extern void i2c_init(uint16_t I2CFreq, uint16_t Fcpu);
 
 
 /** 

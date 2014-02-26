@@ -17,26 +17,16 @@
 
 #include "usart.h" //TODO: Remove this dependency!
 
-/* define CPU frequency in Mhz here if not defined in Makefile */
-#ifndef F_CPU
-#define F_CPU 16000000UL
-#endif
-
-/* I2C clock in Hz */
-#ifndef SCL_CLOCK
-#define SCL_CLOCK  100000L
-#endif
-
 
 /*************************************************************************
  I nitialization* of the I2C bus interface. Need to be called only once
  *************************************************************************/
-void i2c_init(void)
+void i2c_init(uint16_t I2Cfreq, uint16_t fcpu)
 {
     /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
     
     TWSR = (0<<TWPS1) | (0<<TWPS0);                  /* no prescaler */
-    TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */
+    TWBR = ((fcpu/I2Cfreq)-16)/2;  /* must be > 10 for stable operation */
     
 }/* i2c_init */
 
@@ -230,9 +220,12 @@ uint8_t i2c_safe_read_word(unsigned char address, uint8_t reg){
         i2c_rep_start((address << 1)| I2C_READ); //Address of the device in read mode
         LowerByte = i2c_safe_readNak(); // Get the byte, sending NACK
         i2c_stop();
+        return LowerByte;
     }
-    
-    return LowerByte;
+    else {
+        return I2C_SAFE_READ_ERROR_CODE;
+    }
+   
 }/*i2c_safe_read_word*/
 
 
@@ -253,10 +246,13 @@ uint16_t i2c_safe_read_sixteen(uint8_t address, uint8_t reg){
         i2c_rep_start((address << 1)| I2C_READ); //Address of the device in read mode
         UpperByte = i2c_safe_readAck(); // Get the first byte sending ACK
         LowerByte = i2c_safe_readNak(); // Get the second byte, sending NACK
-        i2c_stop();
+        i2c_stop();    
+        return ((UpperByte<<8)|LowerByte); // Return the two bytes as one 16 bit word.
     }
     
-    return ((UpperByte<<8)|LowerByte); // Return the two bytes as one 16 bit word.
+    else {
+        return I2C_SAFE_READ_ERROR_CODE;
+    }
 }/*i2c_safe_read_sixteen*/
 
 

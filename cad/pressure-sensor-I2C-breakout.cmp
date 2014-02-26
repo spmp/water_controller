@@ -1,0 +1,66 @@
+Cmp-Mod V01 Created by CvPcb (2012-apr-16-27)-stable date = Sun 23 Feb 2014 22:10:22 NZDT
+
+BeginCmp
+TimeStamp = /5309961B;
+Reference = C1;
+ValeurCmp = 1uF;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /5309943C;
+Reference = C2;
+ValeurCmp = 0.01uF;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /53099624;
+Reference = C3;
+ValeurCmp = 0.33uF;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /5309976E;
+Reference = C4;
+ValeurCmp = 0.1uF;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /530997F9;
+Reference = P1;
+ValeurCmp = CONN_4;
+IdModule  = SIL-4;
+EndCmp
+
+BeginCmp
+TimeStamp = /530999F2;
+Reference = P2;
+ValeurCmp = CONN_4;
+IdModule  = SIL-4;
+EndCmp
+
+BeginCmp
+TimeStamp = /53099200;
+Reference = R1;
+ValeurCmp = 750;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /53099121;
+Reference = U1;
+ValeurCmp = MPXV-PRESSURE-SENSOR;
+IdModule  = MPXV;
+EndCmp
+
+BeginCmp
+TimeStamp = /5309912A;
+Reference = U2;
+ValeurCmp = LTC2483;
+IdModule  = DFN10_3mmx3mm;
+EndCmp
+
+EndListe

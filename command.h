@@ -8,6 +8,6 @@
 void handle_line(const char* line);
 
 /* Take action on command name and command value */
-void command_from_serial(char commandname, uint32_t commandvalue);
+void command_from_serial(char commandname, uint32_t commandvalue, struct Program *program);
 
 
