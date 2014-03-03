@@ -38,16 +38,7 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
     switch(commandname) {
         //Help!
         case 'h': //Disable logging
-            send_string("Help! Available commands."); send_newline();
-            send_char('\t'); send_string("l: disable logging"); send_newline();
-            send_char('\t'); send_string("L: enable logging"); send_newline();
-            send_char('\t'); send_string("b: boost! heat the tank to the set hotpoint immediatly"); send_newline();
-            send_char('\t'); send_string("f: Fill the water tank"); send_newline();
-            send_char('\t'); send_string("F: Fill the tank to specified litres"); send_newline();
-            send_char('\t'); send_string("t: current time (no parameter), or set time parameter in hhmmss"); send_newline();
-            send_char('\t'); send_string("p: disable the pump"); send_newline();
-            send_char('\t'); send_string("P: enable the pump"); send_newline();
-            send_newline();
+            send_string("Help!"); send_newline();
             break;
         //logging
         case 'l': //Disable logging

@@ -41,6 +41,9 @@ ISR(TIMER2_COMPA_vect) {
     if (ticks >= 125) {
         ticks = 0;
         timestamp += 1;
+        if (timestamp >= 86401) { //roll over for 24 hours
+            timestamp = 0;
+        }
         if (oncePerSecondCallback) {
             oncePerSecondCallback();
         }

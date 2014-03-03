@@ -11,10 +11,10 @@ char line_buffer[MAX_LINE_LEN+1];
 int num_char = 0;
 
 /* usart enable send/recv mode: 8N1 @ 57600 */
-void init_usart() {
+void init_usart(uint16_t baude, uint32_t fcpu) {
     UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1 << RXCIE0);
     UCSR0C = (1 << UCSZ00) | (1 << UCSZ01);
-    UBRR0 = F_CPU / 16 / BAUDE_RATE - 1;
+    UBRR0 = fcpu / 16 / baude - 1;
 }
 
 void usart_set_handle_char_string_from_serial(void (* handlecharstring)(const char*)) {
@@ -23,7 +23,7 @@ void usart_set_handle_char_string_from_serial(void (* handlecharstring)(const ch
 
 /* write a single byte to the usart */
 void send_char(uint8_t byte) {
-    while (~UCSR0A & (1 << UDRE0));
+    while (!(UCSR0A & (1<<UDRE0)));
     UDR0 = byte;
 }
 
@@ -32,6 +32,28 @@ void send_uint16(uint16_t num) {
     uint16_t mult = 10000;
     for (uint8_t i=0; i<5; i++) {
         uint16_t face_value = num / mult;
+        send_char('0' + face_value);
+        num -= face_value * mult;
+        mult /= 10;
+    }
+}
+
+/* write a 32 bit integer to the usart in ascii decimal */
+void send_uint32(uint32_t num) {
+    uint32_t mult = 1000000000;
+    for (uint8_t i=0; i<10; i++) {
+        uint32_t face_value = num / mult;
+        send_char('0' + face_value);
+        num -= face_value * mult;
+        mult /= 10;
+    }
+}
+
+/* write half of a 32 bit integer to the usart in ascii decimal */
+void send_uint32_half(uint32_t num) {
+    uint32_t mult = 10000;
+    for (uint8_t i=0; i<5; i++) {
+        uint32_t face_value = num / mult;
         send_char('0' + face_value);
         num -= face_value * mult;
         mult /= 10;

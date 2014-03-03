@@ -21,7 +21,7 @@
 /*************************************************************************
  I nitialization* of the I2C bus interface. Need to be called only once
  *************************************************************************/
-void i2c_init(uint16_t I2Cfreq, uint16_t fcpu)
+void i2c_init(uint32_t I2Cfreq, uint16_t fcpu)
 {
     /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
     

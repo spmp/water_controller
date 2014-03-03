@@ -51,7 +51,7 @@ int main() {
         //State machine 
         if ( begin_state_machine_flag ) {
             begin_state_machine_flag = 0;
-            state_machine(&program);
+//             state_machine(&program);
         }
         
         //Logging

@@ -13,7 +13,7 @@
 
 
 # ========== Edit below here ========= #
-SOURCES = main.c clock.c usart.c freq.c adc.c temperature.c level.c command.c state-machine.c i2c_safe.c log.c hardware.c pump.c fill.c heat.c
+SOURCES = main.c clock.c usart.c temperature.c level.c command.c state-machine.c i2c_safe.c log.c hardware.c
 PORT = /dev/ttyUSB*
 BAUD_RATE = 57600
 MCU = atmega328p
@@ -35,9 +35,6 @@ CFLAGS = -c -g -Os -Wall -w -ffunction-sections -fdata-sections -mmcu=$(MCU) \
 CPPFLAGS = $(CFLAGS) -fno-exceptions
 LDFLAGS = -Os -Wl,--gc-sections -mmcu=$(MCU) -lm
 HEXFLAGS = -O ihex -R .eeprom
-
-#Added by Me 8)
-# ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 
 PROG_OBJ = $(addprefix $(WORKDIR)/, $(SOURCES:.c=.o))
 
@@ -64,7 +61,7 @@ $(WORKDIR)/%.o: %.c
 
 # linking the program
 $(WORKDIR)/$(TARGET).elf: $(PROG_OBJ)
-	$(CC) $(LDFLAGS) $(PROG_OBJ) -o $@
+	$(CC) $(PROG_OBJ) -o $@ $(LDFLAGS)
 
 # creating the hex file from the elf file (to be stored in the AVR's flash)
 %.hex: %.elf

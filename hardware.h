@@ -29,11 +29,6 @@
 #include "temperature.h"        //Temperature reading
 #include "level.h"              //Level and volume reading
 
-/* Outputs */
-#include "pump.h"               //Pump get/set
-#include "fill.h"               //Fill
-#include "heat.h"               //Heating, heaters get/set, 
-
 /* Initialise all hardware relevant to the project, usart, i2c, clock, external
  * sensors, Everyting!
  * One call to rule them all */

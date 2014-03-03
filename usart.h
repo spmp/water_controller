@@ -3,7 +3,7 @@
 #include <avr/interrupt.h>
 
 #ifndef BAUDE_RATE
-#define BAUDE_RATE 57600
+#define BAUDE_RATE 38400
 #endif
 
 #ifndef BUF_SIZE 20
@@ -18,13 +18,20 @@
  * 				Rx0, Tx1 pins on Arduino
  */
 
-void init_usart();
+void init_usart(uint16_t baude, uint32_t fcpu);
 
 /* write a byte as given to the usart */
 void send_char(uint8_t byte);
 
 /* write a 16 bit integer to the usart in ascii decimal */
 void send_uint16(uint16_t num);
+
+/* write a 32 bit integer to the usart in ascii decimal */
+void send_uint32(uint32_t num);
+
+/* write half of a 32 bit integer to the usart in ascii decimal
+ *  Similar to send_uint16 but will not truncate at 2^16*/
+void send_uint32_half(uint32_t num);
 
 /* write a null-terminated string to the usart */
 void send_string(const char *s);

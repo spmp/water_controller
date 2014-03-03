@@ -47,7 +47,7 @@
     @param  Fcpu, micro clock speed in Hz
     @return none
 */
-extern void i2c_init(uint16_t I2CFreq, uint16_t Fcpu);
+extern void i2c_init(uint32_t I2CFreq, uint16_t Fcpu);
 
 
 /** 
