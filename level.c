@@ -1,23 +1,51 @@
 #include "level.h"
+#include <math.h>
 #include "i2c_safe.h"
+
+uint16_t level_sensor_zero = LEVEL_ZERO_DEFAULT;
 
 /** @brief      Hardware abstraction for level
     @details    Reads the level from whatever device is being used. As much as 
                 possible a placeholder for the hardware specific function.
+                The linear factor for mV to mm of water is 1.400*code - 236.
+                This is modified to not overflow uint16 and use arithmatic shifts
+                There is an offset that must be zeroed out.
+                Expect maximum code of 450 (400mm), can use:
+                (code*140)/1000 with no overflow
+                
     @retval     water_level in mm
 */
 uint16_t level( void ){
-    return  (read_MCP3221()*133)/1000;
+    uint16_t level = (read_MCP3221()*14)/10 - level_sensor_zero;
+    if (level >= 40000 ) { //We have underflowed
+        return 0;
+    }
+    return level;  
     //TODO: do this with bit shift, ie modify 133 etc
 }
 
 /** @brief      Hardware abstraction for volume
     @details    Using the level() function to determine the volume based on the
                 profile of the tank.
-    @retval     water_volume in milli litres
+                Based on a piecwise defined function for (I) level < radius and
+                (II) level >= radius. with 
+                theta = (I) 2*acos( (r-h)/r) , (II) 2*acos( (2r-h)/r )
+                area = (I) r^2(theta - sin(theta))/2, (II) pi*r^2-r^2(theta - sin(theta))/2
+    @param      Level in mm
+    @retval     water_volume in litres, Tank maximum returned for volume >= 2*radius
 */
-uint16_t volume( void ){
-    return 0;
+uint16_t volume( uint16_t level ){
+    double levelf = level;
+    double theta;
+    double volume;
+    if (levelf <= 2*TANK_RADIUS){
+        theta = 2*acos((TANK_RADIUS-levelf)/TANK_RADIUS);
+        volume = TANK_LENGTH*( TANK_RADIUS*TANK_RADIUS*(theta - sin(theta))/2)/1000000;
+    }
+    else {
+        volume = M_PI*TANK_RADIUS*TANK_RADIUS*TANK_LENGTH/1000000;
+    }
+    return (uint16_t)(volume+0.5);
 }
 
 
@@ -58,3 +86,11 @@ uint16_t volume( void ){
 int16_t read_MCP3221( void ){
     return i2c_safe_read_sixteen(0x4D,0xFF); //read address 0x4D, with no register (0xFFF)
 }
+
+/** @brief sensor zeroing for linear offset
+ */
+void level_zero(void) {
+    level_sensor_zero = 0;
+    level_sensor_zero = level();
+}
+    

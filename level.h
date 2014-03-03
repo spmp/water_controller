@@ -5,6 +5,10 @@
 
 #include <avr/io.h>
 
+#define TANK_RADIUS 175.0
+#define TANK_LENGTH 2000.0
+#define LEVEL_ZERO_DEFAULT 236
+
 /** @brief      Hardware abstraction for level
     @details    Reads the level from whatever device is being used. As much as 
                 possible a placeholder for the hardware specific function.
@@ -15,9 +19,10 @@ uint16_t level( void );
 /** @brief      Hardware abstraction for volume
     @details    Using the level() function to determine the volume based on the
                 profile of the tank.
-    @retval     water_volume in milli litres
+    @param      level in mm
+    @retval     water_volume in litres
 */
-uint16_t volume( void );
+uint16_t volume( uint16_t level );
 
 
 /***** Hardware Specific! *****
@@ -55,3 +60,7 @@ uint16_t volume( void );
     @retval     code    12bit code
 */
 int16_t read_MCP3221( void );
+
+/** @brief sensor zeroing for linear offset
+ */
+void level_zero(void);

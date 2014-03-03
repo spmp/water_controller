@@ -87,9 +87,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             break;
         case 'V': //Display volume
             send_string("Volume is: ");
-            send_uint16(volume());
+            send_uint16(volume(commandvalue));
             send_string("L");
             send_newline();
+            break;
+        case 'z': //zero sensor volume
+            send_string("zeroing level sensor: ");
+            send_newline();
+            level_zero();
             break;
             
         //Pump 

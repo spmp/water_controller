@@ -3,7 +3,7 @@
 void init_hardware(void ) {
     init_clock();
     init_usart(38400, F_CPU);
-    i2c_init(400000,F_CPU);
+    i2c_init(300000,F_CPU);
 }
 
 void init_io_ports(void ) {

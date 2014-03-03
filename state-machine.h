@@ -6,9 +6,6 @@
 extern uint8_t begin_state_machine_flag;
 extern uint8_t state_machine_running_flag;
 
-//Needed as a non program related flag as program could change but fill state should not
-extern uint8_t filling_flag;
-
 struct Inputs {
     
     uint8_t reading_inputs;     //This pair of values is for handling of inputs that take a long time to obtain.
@@ -54,6 +51,7 @@ struct Settings {
     uint8_t temperature_settemp;
     uint8_t temperature_set_1;  // The temperature to which the system will automatically be heated
     uint8_t temperature_set_2;
+    uint8_t temperature_max;    // Maximum temperature to maintain
     uint8_t temperature_min;    // Minimum temperature to maintain
     /* Smarts */
     uint16_t daily_heat_potential;      // How much energy to expect in a day
@@ -89,3 +87,8 @@ void check_limits(struct Program *program);
 
 // Set calculated output states to hardware
 void update_outputs(struct Outputs *outputs);
+
+// Disable state_machine
+void disable_state_machine( void );
+// Enable state_machine
+void enable_state_machine( void );
