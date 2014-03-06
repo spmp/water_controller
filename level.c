@@ -45,7 +45,7 @@ uint16_t volume( uint16_t level ){
     else {
         volume = M_PI*TANK_RADIUS*TANK_RADIUS*TANK_LENGTH/1000000;
     }
-    return (uint16_t)(volume+0.5);
+    return volume;      //implicit type conversion
 }
 
 

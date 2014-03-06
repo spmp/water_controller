@@ -4,8 +4,31 @@ uint8_t begin_state_machine_flag = 0;
 uint8_t state_machine_running_flag = 0;
 uint8_t state_machine_enable = 1;
 
-struct Program program = {0};
+/* Running program */
+uint8_t state_machine_program = DEFAULT_PROGRAM; //Default start up program
+uint8_t state_machine_config_program = DEFAULT_PROGRAM; //Default start up program
 
+const struct Settings program_default PROGMEM = {
+    .time_to_hot_1 = 64800,     // 1800
+    .time_to_hot_2 = 21600,     // 0600
+    .level_full = 350,
+    .level_heater_min = 40,
+    .level_min = 0,
+    .level_fill = 350,
+    .temperature_settemp = 65,
+    .temperature_set_1 = 65,
+    .temperature_set_2 = 60,
+    .temperature_max = 80,
+    .temperature_min = 10,
+    .daily_heat_potential = 0,
+    .midsun = 43200,            // 1200
+    .pump_enable = 1,
+    .fill_enable = 1,
+    .heater_enable = 0
+};
+
+struct Program program[NUM_PROGRAM] = {0};
+// program[1] = {{0},{0},{1,2,3,4}}; 
  /* Solar hot water controller
   *     In this application we have a solar hot water controller whose
   *     functional input parameters are:
@@ -114,13 +137,26 @@ void calculate_outputs(struct Program *program) {
     
     //BEGIN fill
     /* The Fill logic */
-        outputs->fill = ( settings->fill_enable                         // stop filling if fill is disabled
-                        && ( outputs->fill                               // the current state
-                        && (inputs->level <= settings->level_full))     // stop filling if level is above level_full
-                        && (inputs->level <= settings->level_fill))     // stop filling if level is above level_fill 
-                        || ( (inputs->level <= settings->level_min)      // start filling if level falls below level_min
-                        || settings->fill_now);                         // start filling if fill_now flag
-        settings->fill_now = 0  ;                                       //reset fill_now flag
+        if (settings->fill_enable) {    // Fill is enabled, so we can do something
+            if (outputs->fill) {         // We are filling, better figure out when to turn off
+                if ((inputs->level>= settings->level_full)) {      // Full or overfull! Turn off
+                    outputs->fill = 0;
+                }
+            }
+            else if ((inputs->level <= settings->level_min) || inputs->fill_now) {    // Level low, start filling
+                outputs->fill = 1;
+            }
+        }
+        else {
+            outputs->fill = 0;
+        }
+//         outputs->fill = ( settings->fill_enable                         // stop filling if fill is disabled
+//                         && ( outputs->fill                               // the current state
+//                         && (inputs->level <= settings->level_full))     // stop filling if level is above level_full
+//                         && (inputs->level <= settings->level_fill))     // stop filling if level is above level_fill 
+//                         || ( (inputs->level <= settings->level_min)      // start filling if level falls below level_min
+//                         || inputs->fill_now);                         // start filling if fill_now flag
+//         inputs->fill_now = 0  ;                                       //reset fill_now flag
     //END fill
     
     //BEGIN heater
@@ -156,8 +192,8 @@ void calculate_outputs(struct Program *program) {
         & (outputs->heater                             // the current state
         & (inputs->temperature <= settings->temperature_settemp)))     // stop heater if temperature is above settemp 
         | ((inputs->temperature <= settings->temperature_min)      // start heating if temperature falls below min
-        | settings->boost_now);                        // start heating if boost_now flag is set
-        settings->boost_now = 0  ;                      // clear boost flag
+        | inputs->boost_now);                        // start heating if boost_now flag is set
+        inputs->boost_now = 0  ;                      // clear boost flag
     //END heater
 }
 

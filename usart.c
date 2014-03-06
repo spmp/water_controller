@@ -67,9 +67,17 @@ void send_string(const char *s) {
     }
 }
 
+/* write a null-terminated string to the usart */
+void send_string_p(const char *s) {
+    while (pgm_read_byte(s)) {
+        send_char(pgm_read_byte(s++));
+    }
+}
+
 void send_newline() {
-    send_char('\r');
-    send_char('\n');
+    send_string_p(PSTR("\r\n"));
+//     send_char('\r');
+//     send_char('\n');
 }
 
 /* Handle USART reading. So much more _fun! */

@@ -1,6 +1,7 @@
 #pragma once
 #include <avr/io.h>
 #include <avr/interrupt.h>
+# include <avr/pgmspace.h>
 
 #ifndef BAUDE_RATE
 #define BAUDE_RATE 38400
@@ -35,6 +36,9 @@ void send_uint32_half(uint32_t num);
 
 /* write a null-terminated string to the usart */
 void send_string(const char *s);
+
+/* write a null-terminated string to the usart from PGM space */
+void send_string_p(const char *s);
 
 void send_newline();
 

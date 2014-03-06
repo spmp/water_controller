@@ -6,6 +6,13 @@
 extern uint8_t begin_state_machine_flag;
 extern uint8_t state_machine_running_flag;
 
+/* Running program */
+#define DEFAULT_PROGRAM 0
+#define NUM_PROGRAM 2          //Number of programs
+extern uint8_t state_machine_program ;
+extern uint8_t state_machine_config_program ;
+
+
 struct Inputs {
     
     uint8_t reading_inputs;     //This pair of values is for handling of inputs that take a long time to obtain.
@@ -15,6 +22,10 @@ struct Inputs {
     uint16_t temperature; // degrees celcius (C)
     uint16_t level; // height (mm)
     uint16_t volume; // Litres
+    
+    /*Program inputs */
+    uint8_t fill_now;
+    uint8_t boost_now;
     
 };
 
@@ -39,12 +50,12 @@ struct Settings {
     /* Time settings */
     uint32_t time_to_hot_1;     // Time (1) to have tank at set temp by
     uint32_t time_to_hot_2;     // Time (2) to have tank at set temp by
-    uint32_t midsun;            // Time at which the sun was/is at its peak
     /* Level settings */
     uint16_t level_full;        // The level of a full tank. Do not exceed 8) // possibly hard wired
     uint16_t level_heater_min;  // The minimum safe level for running the heating elements
     uint16_t level_min;         // The minimum allowable level of water in the tank
     uint16_t level_fill;        // The level to fill the tank to
+//     uint8_t level_zero;          // Zero for the level sensor
     /* Volume settings */
 //     uint16_t 
     /* Temperature settings */
@@ -55,14 +66,11 @@ struct Settings {
     uint8_t temperature_min;    // Minimum temperature to maintain
     /* Smarts */
     uint16_t daily_heat_potential;      // How much energy to expect in a day
+    uint32_t midsun;            // Time at which the sun was/is at its peak
     /* Output settings */
     uint8_t pump_enable;
     uint8_t fill_enable;
     uint8_t heater_enable;
-    /* Intermediate states */
-    uint8_t fill_now;
-    uint8_t boost_now;
-    /* Configuration settings */
 };
 
 struct Program {
@@ -71,7 +79,7 @@ struct Program {
     struct Settings settings;
 };
 
-extern struct Program program;
+extern struct Program program[NUM_PROGRAM];
 
 // The state machine
 void state_machine(struct Program *program);
