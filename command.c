@@ -7,6 +7,7 @@
 #include "clock.h"
 #include "level.h"
 #include "state-machine.h"
+#include "hardware.h"
 
 
 uint8_t eloaded;
@@ -33,6 +34,7 @@ void handle_line(const char* line) {
     uint32_t argument_value = strtoul(line+1, &endptr, 10);
     if (*endptr == '\0') {
         command_from_serial(line[0], argument_value, &program[state_machine_config_program]);
+//         command_from_serial(line[0], argument_value, &program);
     }
 }
 
@@ -41,6 +43,7 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
     
     
     struct Inputs *inputs = &program->inputs;
+    struct Outputs *outputs = &program->outputs;
     struct Settings *settings = &program->settings;
     
     switch(commandname) {
@@ -59,7 +62,7 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             \t P: Pump\r\n \
             0 get value/Other Set value:\r\n \
             \t t: Time (s)\r\n \
-            \t T: Temperature (°Cx100)\r\n \
+            \t T: Temperature (°C)\r\n \
             \t f: Fill now (or to level)\r\n \
             \t b: Boost now (or to temp)\r\n \
             \t Y: TimeToHot1\r\n \
@@ -141,15 +144,28 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
                 inputs->fill_now = 1;
                 send_string_p(PSTR("Filling the tank to "));
                 send_uint16(settings->level_fill);
-                send_string_p(test_string_mm);
             }
             else {
                 settings->level_fill = commandvalue;
                 inputs->fill_now = 1;
                 send_string_p(PSTR("Filler the tank to "));
                 send_uint16(commandvalue);
-                send_string_p(test_string_mm);
+                //TODO: Figure out how to temporarily set fill to the value.
             }
+            break;
+        case 'k':
+            send_string_p(PSTR("Setting output fill (hw)\r\n"));
+//             outputs->fill = 1;
+            fill_set(commandvalue);
+            break;
+        case 'K':
+            send_string_p(PSTR("Clearing output fill (hw)\r\n"));
+//             outputs->fill = 0;
+            OUTPUT_PORT &=  ~(1<<FILL_PIN);
+            break;
+        case 'j':
+            send_string_p(PSTR("Heating the tank to "));
+            heater_set(commandvalue);
             break;
             
         case 'b': //Heat the tank
@@ -157,14 +173,12 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
                 inputs->boost_now = 1;
                 send_string_p(PSTR("Heating the tank to "));
                 send_uint16(settings->temperature_settemp);
-                send_string_p(test_string_degc);
             }
             else {
                 settings->temperature_settemp = commandvalue;
                 inputs->boost_now = 1;
                 send_string_p(PSTR("Heating the tank to "));
                 send_uint16(settings->temperature_settemp);
-                send_string_p(test_string_degc);
             }
             break;
             
@@ -393,26 +407,26 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             break;
             
         case 'z': //Zero level
-                level_zero();
-                send_string_p(PSTR("Zeroing the level.\r\n"));
-//                 send_string_p(PSTR("Zeroing the level. The new zero setting is:"));
-//                 send_uint16(settings->level_zero);
-//                 send_newline();
-//             }
-//             else {
-//                 settings->level_zero = commandvalue;
-//                 send_string_p(PSTR("Setting the level zero to to "));
-//                 send_uint16(settings->level_zero);
-//                 send_newline();
-//             }
-            break;
-            
-            
-//             \t O: Progam to configure\r\n \
-//             \t o: Running program\r\n \
-//             \t C: Config dump\r\n"));
-        case 'o': //Program to run
             if ( commandvalue == 0 ){
+                send_string_p(PSTR("Level zero is: "));
+                send_uint16(level_sensor_zero);
+                send_newline();
+            }
+            else {
+                level_sensor_zero = commandvalue;
+                send_string_p(PSTR("Level zero is: "));
+                send_uint16(level_sensor_zero);
+                send_newline();
+            }
+            break;
+//                 send_string_p(PSTR("WTF!!\r\n"));
+// //                 level();
+// //                 level_zero();
+//                 send_string_p(PSTR("Zeroing the level.\r\n"));
+//             break;
+            
+        case 'o': //Program to run
+            if ( commandvalue == 0 || commandvalue > NUM_PROGRAM){
                 send_string_p(PSTR("The running program is number "));
                 send_char('1'+state_machine_program);
                 send_newline();
@@ -426,7 +440,7 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             break;
             
         case 'O': //Program to configure
-            if ( commandvalue == 0 ){
+            if ( commandvalue == 0 || commandvalue > NUM_PROGRAM){
                 send_string_p(PSTR("The program being configured is "));
                 send_char('1'+state_machine_config_program);
                 send_newline();
@@ -470,7 +484,7 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
         ////////////////////////////////////////////////    
         //I2C related and debugging
         case 'I':
-            send_string_p(PSTR("Scanning I2C bus in read mode: \r\n"));
+            send_string_p(PSTR("Scanning I2C bus in write mode: \r\n"));
             i2c_safe_write_scan_bus(0x00, 0x7F);
             send_string_p(PSTR("Scanning I2C bus in read mode: \r\n"));
             i2c_safe_read_scan_bus(0x00, 0x7F);
@@ -537,6 +551,26 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             send_uint16(wloaded);
             send_string_p(PSTR(" ready to write.\r\n"));
             break;
+            // Toggle an output
+        case 'c':
+            send_string_p(PSTR("Toggling PortD pin"));
+            send_uint16(commandvalue);
+//             DDRD |= (1<<commandvalue); 
+            send_newline();
+            PORTD ^= (1<<commandvalue);
+//             pump_set(commandvalue);
+            break;
+            
+            // Toggle an output
+        case 'x':
+            send_string_p(PSTR("Setting heater_state"));
+            send_uint16(commandvalue);
+            //             DDRD |= (1<<commandvalue); 
+            send_newline();
+            heater_set(commandvalue);
+            //             pump_set(commandvalue);
+            break;
+            
 
     }
 }

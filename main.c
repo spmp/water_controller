@@ -52,12 +52,14 @@ int main() {
         if ( begin_state_machine_flag ) {
             begin_state_machine_flag = 0;
             state_machine(&program[state_machine_program]);
+//             state_machine(&program);
         }
         
         //Logging
         if (send_log) {
             send_log = 0;
             log_to_serial(&program[state_machine_program]);
+//             log_to_serial(&program);
         }
     }
 

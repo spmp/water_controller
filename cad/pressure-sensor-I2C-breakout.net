@@ -1,123 +1,151 @@
-# EESchema Netlist Version 1.1 created  Mon 24 Feb 2014 12:05:47 NZDT
-(
- ( /530999F2 $noname  P2 CONN_4 {Lib=CONN_4}
-  (    1 Vss )
-  (    2 /SCL )
-  (    3 /SDA )
-  (    4 GND )
- )
- ( /530997F9 $noname  P1 CONN_4 {Lib=CONN_4}
-  (    1 Vss )
-  (    2 /SCL )
-  (    3 /SDA )
-  (    4 GND )
- )
- ( /5309976E $noname  C4 0.1uF {Lib=C}
-  (    1 Vss )
-  (    2 GND )
- )
- ( /53099624 $noname  C3 0.33uF {Lib=C}
-  (    1 N-000006 )
-  (    2 GND )
- )
- ( /5309961B $noname  C1 1uF {Lib=C}
-  (    1 Vss )
-  (    2 GND )
- )
- ( /5309943C $noname  C2 0.01uF {Lib=C}
-  (    1 Vss )
-  (    2 GND )
- )
- ( /53099200 $noname  R1 750 {Lib=R}
-  (    1 N-000004 )
-  (    2 N-000006 )
- )
- ( /5309912A $noname  U2 LTC2483 {Lib=LTC2483}
-  (    1 Vss )
-  (    2 Vss )
-  (    3 GND )
-  (    4 N-000006 )
-  (    5 GND )
-  (    6 /SCL )
-  (    7 /SDA )
-  (    8 GND )
-  (    9 GND )
-  (   10 Vss )
- )
- ( /53099121 $noname  U1 MPXV-PRESSURE-SENSOR {Lib=MPXV-PRESSURE-SENSOR}
-  (    2 Vss )
-  (    3 GND )
-  (    4 N-000004 )
- )
-)
-*
-{ Allowed footprints by component:
-$component C4
- SM*
- C?
- C1-1
-$endlist
-$component C3
- SM*
- C?
- C1-1
-$endlist
-$component C1
- SM*
- C?
- C1-1
-$endlist
-$component C2
- SM*
- C?
- C1-1
-$endlist
-$component R1
- R?
- SM0603
- SM0805
- R?-*
- SM1206
-$endlist
-$endfootprintlist
-}
-{ Pin List by Nets
-Net 1 "/SCL" "SCL"
- P1 2
- P2 2
- U2 6
-Net 2 "/SDA" "SDA"
- U2 7
- P2 3
- P1 3
-Net 3 "Vss" "Vss"
- C2 1
- C1 1
- U2 1
- U2 2
- P2 1
- C4 1
- P1 1
- U2 10
- U1 2
-Net 4 "" ""
- R1 1
- U1 4
-Net 5 "GND" "GND"
- C4 2
- P2 4
- P1 4
- C2 2
- C1 2
- C3 2
- U2 5
- U2 8
- U2 9
- U1 3
- U2 3
-Net 6 "" ""
- C3 1
- U2 4
- R1 2
-}
-#End
+(export (version D)
+  (design
+    (source /home/jasper/src/water_controller/cad/pressure-sensor-I2C-breakout.sch)
+    (date "Tue 20 May 2014 15:28:54 NZST")
+    (tool "eeschema (2013-jul-07)-stable"))
+  (components
+    (comp (ref P1)
+      (value CONN_4)
+      (libsource (lib conn) (part CONN_4))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 530997F9))
+    (comp (ref C4)
+      (value 0.1uF)
+      (libsource (lib device) (part C))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 5309976E))
+    (comp (ref C3)
+      (value 0.33uF)
+      (libsource (lib device) (part C))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 53099624))
+    (comp (ref C1)
+      (value 1uF)
+      (libsource (lib device) (part C))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 5309961B))
+    (comp (ref C2)
+      (value 0.01uF)
+      (libsource (lib device) (part C))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 5309943C))
+    (comp (ref R1)
+      (value 750)
+      (libsource (lib device) (part R))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 53099200))
+    (comp (ref U2)
+      (value LTC2483)
+      (libsource (lib state-machine-library_kicad) (part LTC2483))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 5309912A))
+    (comp (ref U1)
+      (value MPXV-PRESSURE-SENSOR)
+      (libsource (lib state-machine-library_kicad) (part MPXV-PRESSURE-SENSOR))
+      (sheetpath (names /) (tstamps /))
+      (tstamp 53099121)))
+  (libparts
+    (libpart (lib device) (part C)
+      (description "Condensateur non polarise")
+      (footprints
+        (fp SM*)
+        (fp C?)
+        (fp C1-1))
+      (fields
+        (field (name Reference) C)
+        (field (name Value) C)
+        (field (name Footprint) ~)
+        (field (name Datasheet) ~))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive))))
+    (libpart (lib device) (part R)
+      (description Resistance)
+      (footprints
+        (fp R?)
+        (fp SM0603)
+        (fp SM0805)
+        (fp R?-*)
+        (fp SM1206))
+      (fields
+        (field (name Reference) R)
+        (field (name Value) R)
+        (field (name Footprint) ~)
+        (field (name Datasheet) ~))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive))))
+    (libpart (lib conn) (part CONN_4)
+      (description "Symbole general de connecteur")
+      (fields
+        (field (name Reference) P)
+        (field (name Value) CONN_4))
+      (pins
+        (pin (num 1) (name P1) (type passive))
+        (pin (num 2) (name P2) (type passive))
+        (pin (num 3) (name P3) (type passive))
+        (pin (num 4) (name P4) (type passive))))
+    (libpart (lib state-machine-library_kicad) (part LTC2483)
+      (fields
+        (field (name Reference) U)
+        (field (name Value) LTC2483))
+      (pins
+        (pin (num 1) (name Ref+) (type input))
+        (pin (num 2) (name Vcc) (type power_in))
+        (pin (num 3) (name Ref-) (type input))
+        (pin (num 4) (name IN+) (type input))
+        (pin (num 5) (name IN-) (type input))
+        (pin (num 6) (name SCL) (type input))
+        (pin (num 7) (name SDA) (type BiDi))
+        (pin (num 8) (name GND) (type power_in))
+        (pin (num 9) (name CA1) (type input))
+        (pin (num 10) (name CA0/F0) (type input))))
+    (libpart (lib state-machine-library_kicad) (part MPXV-PRESSURE-SENSOR)
+      (fields
+        (field (name Reference) U)
+        (field (name Value) MPXV-PRESSURE-SENSOR))
+      (pins
+        (pin (num 2) (name Vs) (type power_in))
+        (pin (num 3) (name GND) (type power_in))
+        (pin (num 4) (name Vout) (type output)))))
+  (libraries
+    (library (logical device)
+      (uri /usr/share/kicad/library/device.lib))
+    (library (logical conn)
+      (uri /usr/share/kicad/library/conn.lib))
+    (library (logical state-machine-library_kicad)
+      (uri state-machine-library_kicad.lib)))
+  (nets
+    (net (code 3) (name "")
+      (node (ref U1) (pin 4))
+      (node (ref R1) (pin 1)))
+    (net (code 4) (name GND)
+      (node (ref U1) (pin 3))
+      (node (ref U2) (pin 9))
+      (node (ref U2) (pin 8))
+      (node (ref U2) (pin 5))
+      (node (ref U2) (pin 3))
+      (node (ref P1) (pin 1))
+      (node (ref C3) (pin 2))
+      (node (ref C2) (pin 2))
+      (node (ref C1) (pin 2))
+      (node (ref C4) (pin 2)))
+    (net (code 5) (name Vss)
+      (node (ref C2) (pin 1))
+      (node (ref U2) (pin 1))
+      (node (ref C1) (pin 1))
+      (node (ref U1) (pin 2))
+      (node (ref U2) (pin 2))
+      (node (ref C4) (pin 1))
+      (node (ref U2) (pin 10))
+      (node (ref P1) (pin 2)))
+    (net (code 6) (name "")
+      (node (ref P1) (pin 4))
+      (node (ref U2) (pin 7)))
+    (net (code 7) (name "")
+      (node (ref P1) (pin 3))
+      (node (ref U2) (pin 6)))
+    (net (code 8) (name "")
+      (node (ref C3) (pin 1))
+      (node (ref U2) (pin 4))
+      (node (ref R1) (pin 2)))))

@@ -2,13 +2,13 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "hardware.h"
-
+extern uint32_t howlongtoheat;
 extern uint8_t begin_state_machine_flag;
 extern uint8_t state_machine_running_flag;
 
 /* Running program */
 #define DEFAULT_PROGRAM 0
-#define NUM_PROGRAM 2          //Number of programs
+#define NUM_PROGRAM 1          //Number of programs
 extern uint8_t state_machine_program ;
 extern uint8_t state_machine_config_program ;
 
@@ -42,7 +42,7 @@ struct Outputs {
     uint8_t heat2;
     /* Intermediary states */
     uint8_t filling;    // Is the system filling? This could be acertained by the fill output state... may go soon!
-    uint8_t heating;
+//     uint8_t heating;
 //     uint8_t boosting;
 };
 
@@ -54,10 +54,7 @@ struct Settings {
     uint16_t level_full;        // The level of a full tank. Do not exceed 8) // possibly hard wired
     uint16_t level_heater_min;  // The minimum safe level for running the heating elements
     uint16_t level_min;         // The minimum allowable level of water in the tank
-    uint16_t level_fill;        // The level to fill the tank to
-//     uint8_t level_zero;          // Zero for the level sensor
-    /* Volume settings */
-//     uint16_t 
+    uint16_t level_fill;        // The level to fill the tank to\
     /* Temperature settings */
     uint8_t temperature_settemp;
     uint8_t temperature_set_1;  // The temperature to which the system will automatically be heated
@@ -80,6 +77,8 @@ struct Program {
 };
 
 extern struct Program program[NUM_PROGRAM];
+
+// extern struct Program program;
 
 // The state machine
 void state_machine(struct Program *program);

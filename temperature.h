@@ -12,13 +12,13 @@
 
 // I2C sensor addresses
 #ifndef TEMP_SENSOR1_ADDRESS
-#define TEMP_SENSOR1_ADDRESS    0x49 // 1001100
+#define TEMP_SENSOR1_ADDRESS    0x49 // 1001100 or d73
 #endif
 #ifndef TEMP_SENSOR2_ADDRESS
-#define TEMP_SENSOR2_ADDRESS    0x4B // 1001110
+#define TEMP_SENSOR2_ADDRESS    0x4B // 1001110 or d75
 #endif
 #ifndef TEMP_SENSOR3_ADDRESS
-#define TEMP_SENSOR3_ADDRESS    0x4F // 1001111
+#define TEMP_SENSOR3_ADDRESS    0x4F // 1001111 or d79
 #endif
 
 // AT30TSE758 initialisation data to be written to NVRam (first byte)

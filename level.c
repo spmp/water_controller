@@ -90,7 +90,7 @@ int16_t read_MCP3221( void ){
 /** @brief sensor zeroing for linear offset
  */
 void level_zero(void) {
-    level_sensor_zero = 0;
-    level_sensor_zero = level();
+    level_sensor_zero = 300;
+//     level_sensor_zero = level();
 }
     

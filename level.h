@@ -7,7 +7,7 @@
 
 #define TANK_RADIUS 175.0
 #define TANK_LENGTH 2000.0
-#define LEVEL_ZERO_DEFAULT 236
+#define LEVEL_ZERO_DEFAULT 260
 
 /** @brief      Hardware abstraction for level
     @details    Reads the level from whatever device is being used. As much as 
@@ -48,7 +48,7 @@ uint16_t volume( uint16_t level );
  *      Level = 98*code/(2^12*0.018) = 98/74*code
  *      need to return micro meters = 1329 * code
  */
-
+extern uint16_t level_sensor_zero;
 
 /***********MCP3221**************
  * I2C 12bit ADC, Vdd=Vref
