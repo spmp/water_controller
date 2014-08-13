@@ -33,7 +33,7 @@ void log_to_serial(struct Program *program) {
         send_string_p(PSTR(" OP "));
         send_uint16(OUTPUT_PORT);
         send_string_p(PSTR(" T2H "));
-        send_uint32_half(howlongtoheat);
+        send_uint32(howlongtoheat);
         send_newline();
     }
 }

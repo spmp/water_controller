@@ -196,6 +196,48 @@ void calculate_outputs(struct Program *program) {
         /* Are we hot enough yet?  NOTE: This could be combined with the above statement, but kept separate for clarity*/
         if (inputs->temperature < settings->temperature_settemp)
         {
+            /* Are we boing to boost? */
+            if ( inputs->boost_now ) 
+            {
+            outputs->heater = 1;        // Set the heater on as we are boosting
+            inputs->boost_now = 0;              // reset the boost flag
+            }
+            /* We are not boosting, but should we turn on? */
+            else
+            {
+                /* Calculating the time to HOT, an Exposition
+                *   What we have:
+                *       Cp (water ) = 4.1855 J/(gK)     (SPECIFIC_HEAT_WATER/1000)
+                *       Density water = 1000g/L
+                *       Heating = 3000W                 (HEATER_SIZE)
+                *       Volume = L
+                *       deltaT = K*1000 (temperature measurements are in Kx1000)
+                *       W = J/s
+                *  So we want to get Seconds out so need:
+                *       s = 1/W(s/J) x Cp(J/(gK)) x denisty(1000g/L) x Volume(L) x deltaT(K*1000)
+                *               Combining the 1000 into Cp gives Cp x 1000 = 4186
+                *       s = Cp*Volume*deltaT/(W*1000)
+                *  BUT with a 32bit unisnged integer, the worst case scenario overflows the numberator,
+                *  i.e numberator(s)_max = 4186*300*100*1000 > 2^32
+                *       But if we reduce the SPECIFIC_HEAT_WATER by a factor of 10 to 418 and decrease the denominator it all fits!
+                *  So now have:
+                *       s = Cp*100 x Volume x deltaT *1000 / (W * 100)
+                *  Now, the timing diagram looks like this:
+                * 
+                *         ^time    TTH1 Midnight TTH2
+                * |-------|######--*----!--------*--------|
+                *          Caclulated time to heat
+                *  When the time to heat + the current time (modulo 24 hours) is greater than the current time we turn on the heaters!
+                */
+                howlongtoheat = (SPECIFIC_HEAT_WATER / 10) * inputs->volume * (settings->temperature_set_1 - inputs->temperature) / (HEATER_SIZE * 100);
+                                
+                uint32_t howlong = (settings->time_to_hot_1 + 24*60*60 - timestamp) % 24*60*60;             //How long until time_to_hot_1 in seconds
+                
+                if ( howlongtoheat >= howlong) {
+                    settings->temperature_settemp = settings->temperature_set_1;
+                    outputs->heater = 1;
+                }
+            }      
         }
         /* Water is hot enough, set heater output off */
         else

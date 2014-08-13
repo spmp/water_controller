@@ -56,11 +56,11 @@ struct Settings {
     uint16_t level_min;         // The minimum allowable level of water in the tank
     uint16_t level_fill;        // The level to fill the tank to\
     /* Temperature settings */
-    uint8_t temperature_settemp;
-    uint8_t temperature_set_1;  // The temperature to which the system will automatically be heated
-    uint8_t temperature_set_2;
-    uint8_t temperature_max;    // Maximum temperature to maintain
-    uint8_t temperature_min;    // Minimum temperature to maintain
+    uint16_t temperature_settemp;
+    uint16_t temperature_set_1;  // The temperature to which the system will automatically be heated
+    uint16_t temperature_set_2;
+    uint16_t temperature_max;    // Maximum temperature to maintain
+    uint16_t temperature_min;    // Minimum temperature to maintain
     /* Smarts */
     uint16_t daily_heat_potential;      // How much energy to expect in a day
     uint32_t midsun;            // Time at which the sun was/is at its peak

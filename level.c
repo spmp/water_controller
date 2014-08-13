@@ -35,17 +35,24 @@ uint16_t level( void ){
     @retval     water_volume in litres, Tank maximum returned for volume >= 2*radius
 */
 uint16_t volume( uint16_t level ){
+    /*
+     // This floating point code does a fantastic job, but can be approximated linearly without loss of usefulness (ie +/- 10 minutes)*
     double levelf = level;
     double theta;
     double volume;
     if (levelf <= 2*TANK_RADIUS){
         theta = 2*acos((TANK_RADIUS-levelf)/TANK_RADIUS);
-        volume = TANK_LENGTH*( TANK_RADIUS*TANK_RADIUS*(theta - sin(theta))/2)/1000000;
+        volume = TANK_LENGTH*( TANK_RADIUS*TANK_RADIUS*(theta - sin(theta))/2)/1000000
     }
     else {
         volume = M_PI*TANK_RADIUS*TANK_RADIUS*TANK_LENGTH/1000000;
     }
     return volume;      //implicit type conversion
+    */
+    
+    /* Linear approximation that takes a linear factor as (Volume full / level full)x1000 */
+    uint32_t volume = VOLUME_LINEAR_FACTOR * level / 1000;
+    return volume;
 }
 
 

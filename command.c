@@ -563,11 +563,11 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
             // Toggle an output
         case 'x':
-            send_string_p(PSTR("Setting heater_state"));
+            send_string_p(PSTR("Turning on heaters"));
             send_uint16(commandvalue);
             //             DDRD |= (1<<commandvalue); 
             send_newline();
-            heater_set(commandvalue);
+            outputs->heater = commandvalue ;
             //             pump_set(commandvalue);
             break;
             
