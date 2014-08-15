@@ -1,0 +1,27 @@
+command.c:            outputs->fill = 1;
+command.c://             outputs->fill = 0;
+log.c:        send_char('0'+outputs->pump);
+log.c:        send_uint16(outputs->fill);
+log.c://         send_char('0'+outputs->fill);
+log.c:        send_char('0'+outputs->heating);
+state-machine.c:    outputs->pump = pump_state();
+state-machine.c:    outputs->fill = fill_state();
+state-machine.c:    outputs->heater = heater_state();    
+state-machine.c:     *  Stop filliling if outputs->fill and level >= filllevel
+state-machine.c:     *  Turn heater off if outputs->heater(1 or 2) and temperateure >= settemp(1 or 2)
+state-machine.c:        outputs->pump = ( inputs->level >= settings->level_min)&&(settings->pump_enable);
+state-machine.c:    if (inputs->level <= settings->level_min) { outputs->fill = 1; }
+state-machine.c:    if (inputs->level >= settings->level_fill) {outputs->fill = 0; }
+state-machine.c:            if (outputs->fill) {        // We are filling, better figure out when to turn off
+state-machine.c:                    outputs->fill = 0;
+state-machine.c:                outputs->fill = 1;
+state-machine.c:            outputs->fill = 0;          // Filling is disabled, turn off the filler
+state-machine.c:        if ( !((inputs->temperature >= settings->temperature_set_1) | (outputs->heating))) {           //If heating already, or temperature greater than settemp do nothing!
+state-machine.c:                outputs->heater = 1;
+state-machine.c:        if (!((inputs->temperature >= settings->temperature_set_2) | (outputs->heating))) {           //If heating already, or temperature greater than settemp do nothing!
+state-machine.c:                outputs->heater = 1;
+state-machine.c:        outputs->heater =  (settings->heater_enable    // stop heater if it is disabled
+state-machine.c:        & (outputs->heater                             // the current state
+state-machine.c:    pump_set(outputs->pump);
+state-machine.c:    fill_set(outputs->fill);
+state-machine.c:    heater_set(outputs->heater);
