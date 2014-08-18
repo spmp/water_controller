@@ -59,11 +59,34 @@ const struct Settings program_default PROGMEM = {
 // struct Program program[NUM_PROGRAM] = {0};
 // initialise and Populate `Programmes' with initial data:
 struct Program program[NUM_PROGRAM] = {
-    {{0},{0},{64800,21600,350,40,5,350,65,65,60,80,10,0,43200,1,1,0}}/*,
-    {{0},{0},{64820,21600,350,41,0,350,66,65,60,80,10,0,43200,1,1,0}},
-    {{0},{0},{64830,21600,350,42,0,350,67,65,60,80,10,0,43200,1,1,0}}  */  
+    {{0},{0},{
+          .time_to_hot_1 = 64800,     // Time (1) to have tank at set temp by
+	  .time_to_hot_2 = 21600,     // Time (2) to have tank at set temp by
+          .morning_fill_time = 36000, // Time at which to check whether to fill the tank or not
+	  /* Level settings */
+	  .level_full = 350,        // The level of a full tank. Do not exceed 8) // possibly hard wired
+	  .level_heater_min = 40,  // The minimum safe level for running the heating elements
+	  .level_min = 5,         // The minimum allowable level of water in the tank
+	  .level_fill = 350,        // The level to fill the tank to\
+	  /* Temperature settings */
+	  .temperature_settemp = 65000,
+	  .temperature_set_1 = 65000,  // The temperature to which the system will automatically be heated
+	  .temperature_set_2 = 60000,
+	  .temperature_max = 90000,    // Maximum temperature to maintain
+	  .temperature_min = 5000,    // Minimum temperature to maintain
+	  /* Smarts */
+	  .daily_heat_potential = 0,      // How much energy to expect in a day
+	  .midsun = 43200,            // Time at which the sun was/is at its peak
+	  /* Output settings */
+	  .pump_enable = 1,
+	  .fill_enable = 1,
+	  .heater_enable = 0
+        }
+    }
+//       64800,21600,350,40,5,350,65,65,60,80,10,0,43200,1,1,0}}/*,
+//     {{0},{0},{64820,21600,350,41,0,350,66,65,60,80,10,0,43200,1,1,0}},
+//     {{0},{0},{64830,21600,350,42,0,350,67,65,60,80,10,0,43200,1,1,0}}  */  
 };
-
 
 /* The State Machine for the system. "state-machine" requires a pointer to the 
  * struct program as we may desire to run different programs in the 
@@ -166,6 +189,14 @@ void calculate_outputs(struct Program *program) {
 //BEGIN fill
     /* The Fill logic */
         if (settings->fill_enable) {    // Fill is enabled, so we can do something
+            /* Is it the time of the day to fill the tank? 
+             *  This algorythm needs to be smartened up when we are measuring daily heat potentials such that:
+             *          -# We enable filling at the morning fill time
+             *          -# Check whether the sun is actually heating the water before refilling
+             *   Will need another flag: waiting_for_morning_fill       */
+            if ( timestamp == settings->morning_fill_time ){     // Time to fill 8)
+                outputs->fill = 1;
+            }
             if (outputs->fill) {        // We are filling, better figure out when to turn off
                 if ((inputs->level >= settings->level_full)||(inputs->level >= settings->level_fill)) {      // Full or overfull! Turn off
                     outputs->fill = 0;

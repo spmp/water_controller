@@ -50,6 +50,7 @@ struct Settings {
     /* Time settings */
     uint32_t time_to_hot_1;     // Time (1) to have tank at set temp by
     uint32_t time_to_hot_2;     // Time (2) to have tank at set temp by
+    uint32_t morning_fill_time; // Time at which to check whether to fill the tank or not
     /* Level settings */
     uint16_t level_full;        // The level of a full tank. Do not exceed 8) // possibly hard wired
     uint16_t level_heater_min;  // The minimum safe level for running the heating elements
