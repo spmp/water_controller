@@ -4,6 +4,7 @@
 #include <util/delay.h>
 
 #include "hardware.h"
+#include "wd.h"
 
 #include "state-machine.h"
 #include "command.h"
@@ -25,6 +26,14 @@ int main() {
     cli();
     set_sleep_mode(SLEEP_MODE_IDLE);
     init_hardware();
+    
+    //TODO: Read settings from EEprom
+    
+    //Send initialisation message:
+    // TODO: This will show how many resets... after the R
+    send_string_p(PSTR("Rx Solar Hotwater Controller. V:2.0.0. Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8)\r\n"));
+    
+    
     //AT30TSE758_init(0x48);
     
 //     DDRB |= (1 << DDB5);
@@ -36,6 +45,7 @@ int main() {
     //USART line handler
     usart_set_handle_char_string_from_serial(&handle_line);
     
+    //Enable Global interrupts
     sei();
 
 //     struct Program program;
@@ -61,6 +71,10 @@ int main() {
             log_to_serial(&program[state_machine_program]);
 //             log_to_serial(&program);
         }
+        
+        //Reset the watchdog
+        wd_reset();
+        
     }
 
     return 0;

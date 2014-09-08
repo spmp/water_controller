@@ -1,6 +1,12 @@
 #pragma once
 #include <avr/io.h>
 
+/* AVR specifics */
+#include "i2c_safe.h"
+#include "usart.h"
+#include "clock.h"
+#include "wd.h"
+
 /* Header to bring together all hardware related functions and routines, set
  * things and stuff like that.
  */
@@ -45,10 +51,6 @@
 #define HEATER_SIZE     3000L
 #define SPECIFIC_HEAT_WATER 4186L
 
-/* AVR specifics */
-#include "i2c_safe.h"
-#include "usart.h"
-#include "clock.h"
 
 /* Inputs */
 #include "temperature.h"        //Temperature reading

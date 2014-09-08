@@ -5,6 +5,7 @@ void init_hardware(void ) {
     init_usart(38400, F_CPU);   //Initialise USART with speed 38400baude
     i2c_init(400000,F_CPU);     //Initilise I^2C with speed 100kHz
     init_io_ports();            //Initialise IO ports
+    init_watchdog(WD_RST_IRQ,WDTO_2S);
 }
 
 void init_io_ports(void ) {
@@ -76,3 +77,5 @@ void heater_set(uint8_t state) {
         OUTPUT_PORT &=  ~(1<<HEAT2_PIN);
     }
 }
+
+/* Reset states and Watchdog ISR */
