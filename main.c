@@ -32,7 +32,7 @@ int main() {
     //Send initialisation message:
     // TODO: This will show how many resets... after the R
     send_string_p(PSTR("Rx Solar Hotwater Controller. V:2.0.0. Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8)\r\n"));
-    
+    wd_reset();
     
     //AT30TSE758_init(0x48);
     
