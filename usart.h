@@ -15,6 +15,12 @@
 #define MAX_LINE_LEN 20
 #endif
 
+
+/* Command response prefix and suffix*/
+#define CRP "c "         //Response prefix, last line
+#define CRp "c "         //Response prefix, n-1 lines
+#define CRS " x"         //Response suffix (followed by /r/n)
+
 /* Resources: 	USART 
  * 				Rx0, Tx1 pins on Arduino
  */
@@ -40,7 +46,11 @@ void send_string(const char *s);
 /* write a null-terminated string to the usart from PGM space */
 void send_string_p(const char *s);
 
+/* Send a newline */
 void send_newline();
+
+/* Send a newline with command response suffix*/
+void send_newline_crs();
 
 /* Serial buffer size */
 int num_in_serial_buffer();

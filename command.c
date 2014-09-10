@@ -1,25 +1,18 @@
 #include "command.h"
-# include <avr/pgmspace.h>
-#include <util/delay.h>
-#include "temperature.h"
-#include "i2c_safe.h"
-#include "log.h"
-#include "clock.h"
-#include "level.h"
-#include "state-machine.h"
-#include "hardware.h"
-
 
 uint8_t eloaded;
 uint8_t wloaded;
 uint8_t Wloaded;
 
 /* Fixed text strings */
-const char test_string_mm[] PROGMEM = "mm\r\n";
-const char test_string_L[] PROGMEM = "L\r\n";
-const char test_string_s[] PROGMEM = "s\r\n";
-const char test_string_degc[] PROGMEM = "°Cx100\r\n";
-const char test_string_kWh[] PROGMEM = "kWh\r\n";
+const char test_string_LastLinePrefix[] PROGMEM = CRP;
+const char test_string_LinePrefix[] PROGMEM = CRp;
+const char test_string_LastLineSuffix[] PROGMEM = CRS;
+const char test_string_mm[] PROGMEM = "mm"CRS"\r\n";
+const char test_string_L[] PROGMEM = "L"CRS"\r\n";
+const char test_string_s[] PROGMEM = "s"CRS"\r\n";
+const char test_string_degc[] PROGMEM = "°Cx100"CRS"\r\n";
+const char test_string_kWh[] PROGMEM = "kWh"CRS"\r\n";
 
 /* Parse null terminated string with expected format:
  * <single letter command><command value>
@@ -49,110 +42,135 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
     switch(commandname) {
         //Help!
         case 'h': //Disable logging
-            send_string_p(PSTR("Help! Available commands.\r\n \
-            Commands are case sensetive letters followed by a number (commandvalue) with no space\r\n \
-            Default commandvalue is 0 if not given\r\n \
-            \t l: Level (mm)\r\n \
-            \t v: Volume (L)\r\n \
-            1 Enable/0 Disable:\r\n \
-            \t L: Logging\r\n \
-            \t S: State machine\r\n \
-            \t F: Fill\r\n \
-            \t H: Heat\r\n \
-            \t P: Pump\r\n \
-            0 get value/Other Set value:\r\n \
-            \t t: Time (s)\r\n \
-            \t T: Temperature (°C)\r\n \
-            \t f: Fill now (or to level)\r\n \
-            \t b: Boost now (or to temp)\r\n \
-            \t Y: TimeToHot1\r\n \
-            \t y: temp TTH1\r\n \
-            \t U: TTH2\r\n \
-            \t u: temp TTH2\r\n \
-            \t M: Max level\r\n \
-            \t m: Min level\r\n \
-            \t J: Heater min level\r\n \
-            \t N: Fill level\r\n \
-            //\t n: Fill level liters\r\n \
-            \t G: Max temp\r\n \
-            \t g: Min temp\r\n \
-            \t s: Midsun\r\n \
-            \t d: DHP (kWh)\r\n \
-            \t z: Zero the level\r\n \
-            \t O: Progam to configure\r\n \
-            \t o: Running program\r\n \
-            \t C: Config dump\r\n"));
+            send_string_p(PSTR(CRp"Help! Available commands.\r\n" \
+CRp"            Commands are case sensetive letters followed by a number (commandvalue) with no space\r\n" \
+CRp"            Default commandvalue is 0 if not given\r\n" \
+CRp"            \t l: Level (mm)\r\n" \
+CRp"            \t v: Volume (L)\r\n" \
+CRp"            1 Enable/0 Disable:\r\n" \
+CRp"            \t L: Logging\r\n" \
+CRp"            \t S: State machine\r\n" \
+CRp"            \t F: Fill\r\n" \
+CRp"            \t H: Heat\r\n" \
+CRp"            \t P: Pump\r\n" \
+CRp"            0 get value/Other Set value:\r\n" \
+CRp"            \t t: Time (s)\r\n" \
+CRp"            \t T: Temperature (°C)\r\n" \
+CRp"            \t f: Fill now (or to level)\r\n" \
+CRp"            \t b: Boost now (or to temp)\r\n" \
+CRp"            \t Y: TimeToHot1\r\n" \
+CRp"            \t y: temp TTH1\r\n" \
+CRp"            \t U: TTH2\r\n" \
+CRp"            \t u: temp TTH2\r\n" \
+CRp"            \t M: Max level\r\n" \
+CRp"            \t m: Min level\r\n" \
+CRp"            \t J: Heater min level\r\n" \
+CRp"            \t N: Fill level\r\n" \
+CRp"            //\t n: Fill level liters\r\n" \
+CRp"            \t G: Max temp\r\n" \
+CRp"            \t g: Min temp\r\n" \
+CRp"            \t s: Midsun\r\n" \
+CRp"            \t d: DHP (kWh)\r\n" \
+CRp"            \t z: Zero the level\r\n" \
+CRp"            \t O: Progam to configure\r\n" \
+CRp"            \t o: Running program\r\n" \
+CRP"            \t C: Config dump "CRS"\r\n"));
             break;
             
         case 'L': //logging
             if (commandvalue != 1){
                 disable_logging();
-                send_string_p(PSTR("Logging disabled, enable with 'L1'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Logging disabled, enable with 'L1'."));
+                send_newline_crs();
             }
             else {
                 enable_logging();
-                send_string_p(PSTR("Logging enabled, disable with 'L'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Logging enabled, disable with 'L'."));
+                send_newline_crs();
             }
             break;
             
         case 'S': //State machine
             if (commandvalue != 1){
                 disable_state_machine();
-                send_string_p(PSTR("State machine disabled, enable with 'S1'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("State machine disabled, enable with 'S1'."));
+                send_newline_crs();
             }
             else {
                 enable_state_machine();
-                send_string_p(PSTR("State machine enabled, disable with 'S'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("State machine enabled, disable with 'S'."));
+                send_newline_crs();
             }
             break;
             
         case 'F': //Filler
             if (commandvalue != 1){
                 settings->fill_enable = 0;
-                send_string_p(PSTR("Filler disabled, enable with 'F1'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Filler disabled, enable with 'F1'."));
+                send_newline_crs();
             }
             else {
                 settings->fill_enable = 1;
-                send_string_p(PSTR("Filler enabled, disable with 'F0'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Filler enabled, disable with 'F0'."));
+                send_newline_crs();
             }
             break;
             
         case 'H': //Heater
             if (commandvalue != 1){
                 settings->heater_enable = 0;
-                send_string_p(PSTR("Heater disabled, enable with 'H1'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Heater disabled, enable with 'H1'."));
+                send_newline_crs();
             }
             else {
                 settings->heater_enable = 1;
-                send_string_p(PSTR("Heater enabled, disable with 'H0'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Heater enabled, disable with 'H0'."));
+                send_newline_crs();
             }
             break;
             
         case 'P': //Pump
             if (commandvalue != 1){
                 settings->pump_enable = 0;
-                send_string_p(PSTR("Pump disabled, enable with 'P1'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Pump disabled, enable with 'P1'."));
+                send_newline_crs();
             }
             else {
                 settings->pump_enable = 1;
-                send_string_p(PSTR("Pump enabled, disable with 'P0'.\r\n"));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Pump enabled, disable with 'P0'."));
+                send_newline_crs();
             }
             break;
             
         case 'f': //Fill the tank
             if (commandvalue == 0){
                 inputs->fill_now = 1;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Filling the tank to "));
                 send_uint16(settings->level_fill);
+                send_string_p(PSTR(" mm"CRS"\r\n"));
             }
             else {
                 settings->level_fill = commandvalue;
                 inputs->fill_now = 1;
-                send_string_p(PSTR("Filler the tank to "));
+                send_string_p(test_string_LastLinePrefix);
+                send_string_p(PSTR("Filling the tank to "));
                 send_uint16(commandvalue);
+                send_string_p(PSTR(" mm"CRS"\r\n"));
                 //TODO: Figure out how to temporarily set fill to the value.
             }
             break;
+            /* WTF?
         case 'k':
             send_string_p(PSTR("Setting output fill (hw)\r\n"));
 //             outputs->fill = 1;
@@ -163,47 +181,58 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
 //             outputs->fill = 0;
             OUTPUT_PORT &=  ~(1<<FILL_PIN);
             break;
+            */
         case 'j':
+            send_string_p(test_string_LastLinePrefix);
             send_string_p(PSTR("Heating the tank to "));
             heater_set(commandvalue);
+            send_string_p(test_string_degc);
             break;
             
         case 'b': //Heat the tank
             if (commandvalue == 0){
                 inputs->boost_now = 1;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Heating the tank to "));
                 send_uint16(settings->temperature_settemp);
+                send_string_p(test_string_degc);
             }
             else {
                 settings->temperature_settemp = commandvalue;
                 inputs->boost_now = 1;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Heating the tank to "));
                 send_uint16(settings->temperature_settemp);
+                send_string_p(test_string_degc);
             }
             break;
             
         case 't': //Time
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("The time is: "));
                 send_uint32_half(timestamp);
-                send_newline();
+                send_newline_crs();
             }
             else {
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting the time to "));
                 send_uint32_half(commandvalue);
-                send_newline();
+                send_newline_crs();
                 timestamp = commandvalue;
             }
             break;
            
         case 'T':  //Temperature
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("The temperature is: "));
                 send_uint16(inputs->temperature);
                 send_string_p(test_string_degc);
             }
             else {
                 settings->temperature_settemp = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting temperature setpoint to "));
                 send_uint16(settings->temperature_settemp);
                 send_string_p(test_string_degc);
@@ -211,12 +240,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             break;
             
         case 'l':  //Level
+            send_string_p(test_string_LastLinePrefix);
             send_string_p(PSTR("The level is "));
-                send_uint16(inputs->level);
-                send_string_p(test_string_mm);
+            send_uint16(inputs->level);
+            send_string_p(test_string_mm);
             break;
                 
         case 'v':  //Volume
+            send_string_p(test_string_LastLinePrefix);
             send_string_p(PSTR("The volume is "));
             send_uint16(inputs->volume);
             send_string_p(test_string_L);
@@ -224,27 +255,25 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         //Time and temp to hot
         case 'Y': //Time to hot 1
-            if ( commandvalue == 0 ){
-                send_string_p(PSTR("The time_to_hot_1 is: "));
-                send_uint16(settings->time_to_hot_1);
-                send_string_p(test_string_s);
-            }
-            else {
+            if ( commandvalue != 0 ){
                 settings->time_to_hot_1 = commandvalue;
-                send_string_p(PSTR("Setting time_to_hot_1 to "));
-                send_uint16(settings->time_to_hot_1);
-                send_string_p(test_string_s);
             }
+            send_string_p(test_string_LastLinePrefix);
+            send_string_p(PSTR("Setting time_to_hot_1 to "));
+            send_uint16(settings->time_to_hot_1);
+            send_string_p(test_string_s);
             break;
             
         case 'y': //time_to_hot_1 settemp
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setpoint temperature 1 is: "));
                 send_uint16(settings->temperature_set_1);
                 send_string_p(test_string_degc);
             }
             else {
                 settings->temperature_set_1 = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting setpoint temperature 1 to "));
                 send_uint16(settings->temperature_set_1);
                 send_string_p(test_string_degc);
@@ -253,11 +282,13 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'U': //Time to hot 2
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("The time_to_hot_2 is: "));
                 send_uint16(settings->time_to_hot_2);
                 send_string_p(test_string_s);
             }
             else {
+                send_string_p(test_string_LastLinePrefix);
                 settings->time_to_hot_2 = commandvalue;
                 send_string_p(PSTR("Setting time_to_hot_2 to "));
                 send_uint16(settings->time_to_hot_2);
@@ -267,11 +298,13 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'u': //time_to_hot_2 settemp
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setpoint temperature 2 is: "));
                 send_uint16(settings->temperature_set_2);
                 send_string_p(test_string_degc);
             }
             else {
+                send_string_p(test_string_LastLinePrefix);
                 settings->temperature_set_2 = commandvalue;
                 send_string_p(PSTR("Setting setpoint temperature 2 to "));
                 send_uint16(settings->temperature_set_2);
@@ -281,11 +314,13 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'M': //Maximum level
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Current maximum level is: "));
                 send_uint16(settings->level_full);
                 send_string_p(test_string_mm);
             }
             else {
+                send_string_p(test_string_LastLinePrefix);
                 settings->level_full = commandvalue;
                 send_string_p(PSTR("Setting maximum level to "));
                 send_uint16(settings->level_full);
@@ -295,12 +330,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'm': //Minimum level
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Current minimum level is: "));
                 send_uint16(settings->level_min);
                 send_string_p(test_string_mm);
             }
             else {
                 settings->level_min = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting minimum level to "));
                 send_uint16(settings->level_min);
                 send_string_p(test_string_mm);
@@ -309,12 +346,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'J': //Heater minimum level
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Current heater minimum level is: "));
                 send_uint16(settings->level_heater_min);
                 send_string_p(test_string_mm);
             }
             else {
                 settings->level_heater_min = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting heater minimum level to "));
                 send_uint16(settings->level_heater_min);
                 send_string_p(test_string_mm);
@@ -323,12 +362,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'N': //Current fill level
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Current fill level is: "));
                 send_uint16(settings->level_fill);
                 send_string_p(test_string_mm);
             }
             else {
                 settings->level_fill = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting fill level to "));
                 send_uint16(settings->level_fill);
                 send_string_p(test_string_mm);
@@ -337,6 +378,7 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'n': //Current fill level in liters
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Current fill level is: "));
                 send_uint16(settings->level_fill);
                 send_string_p(test_string_L);
@@ -352,12 +394,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'G': //Maximum temperature 
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Maximum temperature is: "));
                 send_uint16(settings->temperature_max);
                 send_string_p(test_string_degc);
             }
             else {
                 settings->temperature_max = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting maximum temperature to "));
                 send_uint16(settings->temperature_max);
                 send_string_p(test_string_degc);
@@ -366,12 +410,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'g': //Minimum temperature 
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Minimum temperature is: "));
                 send_uint16(settings->temperature_min);
                 send_string_p(test_string_degc);
             }
             else {
                 settings->temperature_min = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting minimum temperature to "));
                 send_uint16(settings->temperature_min);
                 send_string_p(test_string_degc);
@@ -380,12 +426,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 's': //Midday sun
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Midday by the sun is at "));
                 send_uint16(settings->midsun);
                 send_string_p(test_string_s);
             }
             else {
                 settings->midsun = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting midday by the sun to "));
                 send_uint16(settings->midsun);
                 send_string_p(test_string_s);
@@ -394,12 +442,14 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'd': //Daily heating potential
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Daily heating potential is "));
                 send_uint16(settings->daily_heat_potential);
                 send_string_p(test_string_kWh);
             }
             else {
                 settings->midsun = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Setting daily heating potential to "));
                 send_uint16(settings->daily_heat_potential);
                 send_string_p(test_string_kWh);
@@ -408,48 +458,56 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
             
         case 'z': //Zero level
             if ( commandvalue == 0 ){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Level zero is: "));
                 send_uint16(level_sensor_zero);
-                send_newline();
+                send_newline_crs();
             }
             else {
                 level_sensor_zero = commandvalue;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Level zero is: "));
                 send_uint16(level_sensor_zero);
-                send_newline();
+                send_newline_crs();
             }
             break;
+//                 send_string_p(test_string_LastLinePrefix);
 //                 send_string_p(PSTR("WTF!!\r\n"));
 // //                 level();
 // //                 level_zero();
+//                 send_string_p(test_string_LastLinePrefix);
 //                 send_string_p(PSTR("Zeroing the level.\r\n"));
 //             break;
             
         case 'o': //Program to run
             if ( commandvalue == 0 || commandvalue > NUM_PROGRAM){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("The running program is number "));
                 send_char('1'+state_machine_program);
-                send_newline();
+                send_newline_crs();
             }
             else {
                 state_machine_program = commandvalue-1;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Running program switched to "));
                 send_char('1'+state_machine_program);
-                send_newline();
+                send_newline_crs();
             }
             break;
             
         case 'O': //Program to configure
             if ( commandvalue == 0 || commandvalue > NUM_PROGRAM){
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("The program being configured is "));
                 send_char('1'+state_machine_config_program);
-                send_newline();
+                send_newline_crs();
             }
             else {
                 state_machine_config_program = commandvalue-1;
+                send_string_p(test_string_LastLinePrefix);
                 send_string_p(PSTR("Now configuring program "));
                 send_char('1'+state_machine_config_program);
-                send_newline();
+                send_newline_crs();
             }
             break;
             

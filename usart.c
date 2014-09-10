@@ -74,10 +74,17 @@ void send_string_p(const char *s) {
     }
 }
 
+
+/* Send a newline */
 void send_newline() {
     send_string_p(PSTR("\r\n"));
 //     send_char('\r');
 //     send_char('\n');
+}
+
+/* Send a newline with command response suffix*/
+void send_newline_crs(){
+    send_string_p(PSTR(CRS"\r\n"));
 }
 
 /* Handle USART reading. So much more _fun! */
