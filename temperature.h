@@ -34,7 +34,7 @@
 /** @brief      Temperate measure, hardware agnostic abstraction
     @retval     temperature Temperate in °Cx1000
 */
-int16_t temperature(void);
+uint16_t temperature(void);
 
 /** @brief      The change in temperature over one second
     @retval     delta_t The change in temperature over one second in °Cx1000
@@ -66,4 +66,4 @@ uint8_t init_AT30TSE758(uint8_t address);
     @retval     temperature     in °Cx1000, or
     @retval     0xFFFF          if read failed
 */
-int16_t read_AT30TSE758(uint8_t address);
+int32_t read_AT30TSE758(uint8_t address);
