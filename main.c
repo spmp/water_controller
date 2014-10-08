@@ -22,10 +22,10 @@ void medium_timestep() {
 }
 
 
-int main() {
+int main() {    
+    init_hardware();
     cli();
     set_sleep_mode(SLEEP_MODE_IDLE);
-    init_hardware();
     
     //TODO: Read settings from EEprom
     
