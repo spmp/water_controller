@@ -28,7 +28,7 @@ set watchdog modes and prescale
 usage-
     WD_SET(mode,[timeout]);     //prescale always set
         OR
-    init_watchdog(mote,[timeout]);
+    init_watchdog(mode,[timeout]);
 
 modes-
     WD_OFF                      disabled
@@ -157,8 +157,8 @@ cleared on every power up or reset, along with disabling the watchdog-
 #define wdt_disable()   WD_SET(WD_OFF)
 // The following added by Jasper (JA) for consistency with other hardware initialisations, and with wdt.h
 #define init_watchdog(mode, timeout) WD_SET(mode, timeout)
-#define wdt_reset WD_AVR_RESET()
-#define wd_reset() WD_AVR_RESET()
+#define wdt_reset WDR()
+#define wd_reset() WDR()
 
 
 #endif /* _AVR_WD_H_ */

@@ -1,12 +1,13 @@
 #include "hardware.h"
 
 void init_hardware(void ) {
+    wd_reset();
+    WD_SET(WD_OFF);
     init_clock();
     init_usart(38400, F_CPU);   //Initialise USART with speed 38400baude
     i2c_init(400000,F_CPU);     //Initilise I^2C with speed 100kHz
     init_io_ports();            //Initialise IO ports
-    init_watchdog(WD_RST_IRQ,WDTO_4S);
-    wd_reset();
+    WD_SET(WD_RST,WDTO_4S);
 }
 
 void init_io_ports(void ) {

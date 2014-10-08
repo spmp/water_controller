@@ -13,6 +13,8 @@
 #include "state-machine.h"
 #include "hardware.h"
 
+extern uint8_t send_mcusr_flag;
+
 /* Parse the recieved line into command name and value */
 void handle_line(const char* line);
 

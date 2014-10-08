@@ -3,6 +3,7 @@
 uint8_t eloaded;
 uint8_t wloaded;
 uint8_t Wloaded;
+uint8_t send_mcusr_flag = 0 ;
 
 /* Fixed text strings */
 const char test_string_LastLinePrefix[] PROGMEM = CRP;
@@ -74,7 +75,8 @@ CRp"            \t d: DHP (kWh)\r\n" \
 CRp"            \t z: Zero the level\r\n" \
 CRp"            \t O: Progam to configure\r\n" \
 CRp"            \t o: Running program\r\n" \
-CRP"            \t C: Config dump "CRS"\r\n"));
+CRP"            \t C: Config dump \r\n" \
+CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             break;
             
         case 'L': //logging
@@ -509,6 +511,10 @@ CRP"            \t C: Config dump "CRS"\r\n"));
                 send_char('1'+state_machine_config_program);
                 send_newline_crs();
             }
+            break;
+                
+        case 'W':  //Watchdog reset
+            send_mcusr_flag =1;
             break;
             
         //Temperature sensors
