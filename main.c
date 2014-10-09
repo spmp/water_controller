@@ -13,6 +13,8 @@
 // Watchdog and reset state.
 // "You're not suppose to call get_mcusr() in main().
 // "the attribute section(".init3") puts the code in before main() so it runs automatically before entering main().
+// NOTE: The following code _MAY_ work without bootloader, but WILL NOT work with bootlaoder
+/*
 uint8_t mcusr_mirror __attribute__ ((section (".noinit")));
 void get_mcusr(void) \
 __attribute__((naked)) \
@@ -22,6 +24,15 @@ void get_mcusr(void)
 mcusr_mirror = MCUSR;
 MCUSR = 0;
 wdt_disable();
+}
+*/
+// NOTE: This code will work with a recent version of 'optiboot' as the bootloader:
+uint8_t resetFlags __attribute__ ((section(".noinit")));
+void resetFlagsInit(void) __attribute__ ((naked)) __attribute__ ((section (".init0")));
+void resetFlagsInit(void)
+{
+  // save the reset flags passed from the bootloader
+  __asm__ __volatile__ ("mov %0, r2\n" : "=r" (resetFlags) :);
 }
 
 uint8_t send_log = 0;
@@ -47,7 +58,7 @@ int main() {
     //Send initialisation message:
     // TODO: This will show how many resets... after the R
     send_string_p(PSTR("Rx Solar Hotwater Controller. V:2.0.0. Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8): "));
-    send_uint16(mcusr_mirror);
+    send_uint16(resetFlags);
     send_string_p(PSTR(" x\r\n"));
 
     
@@ -77,11 +88,13 @@ int main() {
         
         if(send_mcusr_flag){
             send_string_p(PSTR("c Watchdog Status MCUSR:"));
-            send_uint16(mcusr_mirror);
+            send_uint16(resetFlags);
             send_string_p(PSTR(" x"));
         }
         
         //State machine 
+        disable_state_machine();        // Debugging. Will do this if MCUSR is not 0
+        disable_logging();              // Debugging
         if ( begin_state_machine_flag ) {
             begin_state_machine_flag = 0;
             state_machine(&program[state_machine_program]);
