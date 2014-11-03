@@ -109,15 +109,16 @@ uint8_t init_AT30TSE758(uint8_t address){
     @retval     temperature     in °Cx1000, or
     @retval     0xFFFF          if read failed
 */
-int32_t read_AT30TSE758(uint8_t address){
+uint16_t read_AT30TSE758(uint8_t address){
     uint16_t tempraw = i2c_safe_read_sixteen(address, 0x0);
-    if ( tempraw >= 0x8000 ) { //Temperature is negative
+    if ( tempraw >= 0x8000 ) { //Temperature is negative, and we dont care
+        return 0;
+        //Old code for negative numbers...
         // TODO: How do we know its negative!! aaarg crap, what bad coding!!!x
-        return ( -((tempraw & 0x7FFF)>>5)*125);
+        //return ( -((tempraw & 0x7FFF)>>5)*125);
     }
     else {
-        return ( (tempraw>>5)*125);
+        return ( (tempraw>>5)*12.5);
     }
-    return tempraw;
 }
 

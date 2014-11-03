@@ -19,7 +19,7 @@ struct Inputs {
     uint8_t waiting_on_inputs;
     
     /* These values contain the input metrics for the state machine */
-    uint16_t temperature; // degrees celcius (C)
+    uint16_t temperature; // degrees celcius (Cx100)
     uint16_t level; // height (mm)
     uint16_t volume; // Litres
     

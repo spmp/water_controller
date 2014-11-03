@@ -12,13 +12,13 @@
 
 // I2C sensor addresses
 #ifndef TEMP_SENSOR1_ADDRESS
-#define TEMP_SENSOR1_ADDRESS    0x49 // 1001100 or d73
+#define TEMP_SENSOR1_ADDRESS    0x4F // 1001111 or d79
 #endif
 #ifndef TEMP_SENSOR2_ADDRESS
-#define TEMP_SENSOR2_ADDRESS    0x48 // 1001110 or d72
+#define TEMP_SENSOR2_ADDRESS    0x48 // 1001000 or d72
 #endif
 #ifndef TEMP_SENSOR3_ADDRESS
-#define TEMP_SENSOR3_ADDRESS    0x4F // 1001111 or d79
+#define TEMP_SENSOR3_ADDRESS    0x49 // 1001001 or d73
 #endif
 
 // AT30TSE758 initialisation data to be written to NVRam (first byte)
@@ -63,7 +63,7 @@ uint8_t init_AT30TSE758(uint8_t address);
 
 /** @brief      Read temperature from an AT30TSE758 device
     @param      address         I2C address of the AT30TSE758
-    @retval     temperature     in °Cx1000, or
+    @retval     temperature     in °Cx100, or
     @retval     0xFFFF          if read failed
 */
-int32_t read_AT30TSE758(uint8_t address);
+uint16_t read_AT30TSE758(uint8_t address);

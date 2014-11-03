@@ -69,11 +69,11 @@ struct Program program[NUM_PROGRAM] = {
 	  .level_min = 5,         // The minimum allowable level of water in the tank
 	  .level_fill = 350,        // The level to fill the tank to\
 	  /* Temperature settings */
-	  .temperature_settemp = 65000,
-	  .temperature_set_1 = 65000,  // The temperature to which the system will automatically be heated
-	  .temperature_set_2 = 60000,
-	  .temperature_max = 90000,    // Maximum temperature to maintain
-	  .temperature_min = 5000,    // Minimum temperature to maintain
+	  .temperature_settemp = 6500,
+	  .temperature_set_1 = 6500,  // The temperature to which the system will automatically be heated
+	  .temperature_set_2 = 6000,
+	  .temperature_max = 9000,    // Maximum temperature to maintain
+	  .temperature_min = 500,    // Minimum temperature to maintain
 	  /* Smarts */
 	  .daily_heat_potential = 0,      // How much energy to expect in a day
 	  .midsun = 43200,            // Time at which the sun was/is at its peak

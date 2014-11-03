@@ -37,6 +37,13 @@
 #define DATA            (DATA_PINPORT & _BV(DATA_PIN))
 #define TOGGLE_DATA     DATA_PORT ^= _BV(DATA_PIN)
 
+
+// Temperature sensors
+#define TEMP_SENSOR1_ADDRESS    0x4F // 1001111 or d79
+#define TEMP_SENSOR2_ADDRESS    0x48 // 1001000 or d72
+#define TEMP_SENSOR3_ADDRESS    0x49 // 1001001 or d73
+
+
 /*
 #define OUTPUT_PORT     PORTB
 #define INPUT_PORT      PINB

@@ -57,7 +57,7 @@ int main() {
     
     //Send initialisation message:
     // TODO: This will show how many resets... after the R
-    send_string_p(PSTR("Rx Solar Hotwater Controller. V:2.0.0. Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8): "));
+    send_string_p(PSTR("Rx Solar Hotwater Controller. V:2.1.0. Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8): "));
     send_uint16(resetFlags);
     send_string_p(PSTR(" x\r\n"));
 
@@ -76,8 +76,16 @@ int main() {
     //Enable Global interrupts
     sei();
 
-//     struct Program program;
+    disable_state_machine();        // Debugging. Will do this if MCUSR is not 0
+    disable_logging();              // Debugging
 
+//     // Debugging
+//     if(send_mcusr_flag){
+//         send_string_p(PSTR("c Watchdog Status MCUSR:"));
+//         send_uint16(resetFlags);
+//         send_string_p(PSTR(" x"));
+//     }
+        
     for (;;) {
         sleep_mode(); // blocked until after an interrupt has fired
         
@@ -86,15 +94,7 @@ int main() {
             handle_single_char_from_serial();
         }
         
-        if(send_mcusr_flag){
-            send_string_p(PSTR("c Watchdog Status MCUSR:"));
-            send_uint16(resetFlags);
-            send_string_p(PSTR(" x"));
-        }
-        
         //State machine 
-        disable_state_machine();        // Debugging. Will do this if MCUSR is not 0
-        disable_logging();              // Debugging
         if ( begin_state_machine_flag ) {
             begin_state_machine_flag = 0;
             state_machine(&program[state_machine_program]);

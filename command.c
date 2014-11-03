@@ -520,6 +520,7 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
         //Temperature sensors
         case 'A': //Intitialise AT30TSE758
             send_string_p(PSTR("Initilaising AT30TSE758 sensor 1...\r\n"));
+//             init_AT30TSE758(commandvalue);
             if ( !init_AT30TSE758(TEMP_SENSOR1_ADDRESS) ){
                 send_string_p(PSTR("Success."));
             }
