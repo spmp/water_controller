@@ -164,6 +164,37 @@ unsigned char i2c_write( unsigned char data )
     
 }/* i2c_write */
 
+/** Safe I2C read Ack
+ @brief         Read one byte from the I2C d*evic*e, request more data from device
+                and return error if communication times out.
+ @retval        byte read from I2C device if no timeout
+*/
+unsigned char i2c_readAck(void)
+ {
+     TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
+     while(!(TWCR & (1<<TWINT)));
+    {
+        return TWDR;
+    }
+     
+ }/* i2c_readAck */
+
+/**
+    @brief      Safe I2C read Nak
+    @details    Read one byte from the I2C device, read is followed by a stop condition
+                and return error if communication times out.
+    @retval     byte read from I2C device if no timeout,
+*/
+unsigned char i2c_readNak(void)
+{
+    TWCR = (1<<TWINT) | (1<<TWEN);
+    while(!(TWCR & (1<<TWINT)));
+    {
+        return TWDR;
+    }
+    
+}/* i2c_readNak */
+
 
 /* Safe commands */
 
@@ -174,13 +205,15 @@ unsigned char i2c_write( unsigned char data )
 unsigned char i2c_safe_start(unsigned char address)
 {
     uint8_t   twst;
-    uint16_t  i2cLoopCounter=0;
+    uint16_t  i2cLoopCounter=0xFFFF;
     
     // send START condition
-    TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN); // wait until transmission completed
+    TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN); 
     
-    while(!(TWCR & (1<<TWINT)) && !i2cLoopCounter);
-    i2cLoopCounter++;
+    // wait until transmission completed
+    while(!(TWCR & (1<<TWINT)) && i2cLoopCounter){
+        i2cLoopCounter--;
+    }
     // check value of TWI Status Register. Mask prescaler bits.
     twst = TW_STATUS & 0xF8;
     if ( (twst != TW_START) && (twst != TW_REP_START)) return 1;
@@ -189,8 +222,11 @@ unsigned char i2c_safe_start(unsigned char address)
     TWDR = address;
     TWCR = (1<<TWINT) | (1<<TWEN);
     
+    i2cLoopCounter=0xFFFF;
     // wail until transmission completed and ACK/NACK has been received
-    while(!(TWCR & (1<<TWINT)));
+    while(!(TWCR & (1<<TWINT)) && i2cLoopCounter){
+        i2cLoopCounter--;
+    }
     
     // check value of TWI Status Register. Mask prescaler bits.
     twst = TW_STATUS & 0xF8;
@@ -205,13 +241,13 @@ unsigned char i2c_safe_start(unsigned char address)
  *************************************************************************/
 void i2c_safe_stop(void)
 {
-    uint32_t i2cLoopCounter =0;
+    uint16_t i2cLoopCounter = 0xFFFF;
     /* send stop condition */
     TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
     
     // wait until stop condition is executed and bus released
-    while(TWCR & (1<<TWSTO) && !i2cLoopCounter);
-        i2cLoopCounter++;
+    while(TWCR & (1<<TWSTO) && i2cLoopCounter);
+        i2cLoopCounter--;
     
 }/* i2c_stop */
 
@@ -225,15 +261,15 @@ void i2c_safe_stop(void)
 unsigned char i2c_safe_write( unsigned char data )
 {   
     uint8_t   twst;
-    uint16_t  i2cLoopCounter=0;
+    uint16_t  i2cLoopCounter=0xFFFF;
     
     // send data to the previously addressed device
     TWDR = data;
     TWCR = (1<<TWINT) | (1<<TWEN);
     
     // wait until transmission completed
-    while(!(TWCR & (1<<TWINT)) && !i2cLoopCounter);
-    i2cLoopCounter++;
+    while(!(TWCR & (1<<TWINT)) && i2cLoopCounter);
+    i2cLoopCounter--;
     
     // check value of TWI Status Register. Mask prescaler bits
     twst = TW_STATUS & 0xF8;
@@ -266,11 +302,11 @@ unsigned char i2c_safe_rep_start(unsigned char address)
 */
 unsigned char i2c_safe_readAck(void)
  {
-    uint16_t  i2cLoopCounter=0;
+    uint16_t  i2cLoopCounter=0xFFFF;
      TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
-     while(!(TWCR & (1<<TWINT)) && !i2cLoopCounter);
+     while(!(TWCR & (1<<TWINT)) && i2cLoopCounter);
         {
-        i2cLoopCounter++;
+        i2cLoopCounter--;
         return TWDR;
         }
      
@@ -285,11 +321,11 @@ unsigned char i2c_safe_readAck(void)
 */
 unsigned char i2c_safe_readNak(void)
 {
-    uint16_t  i2cLoopCounter=0;
+    uint16_t  i2cLoopCounter=0xFFFF;
     TWCR = (1<<TWINT) | (1<<TWEN);
-    while(!(TWCR & (1<<TWINT))  && !i2cLoopCounter);
+    while(!(TWCR & (1<<TWINT))  && i2cLoopCounter);
         {
-        i2cLoopCounter++;
+        i2cLoopCounter--;
         return TWDR;
         }
     
@@ -425,6 +461,41 @@ void i2c_safe_read_scan_bus(uint8_t start_addr, uint8_t stop_addr){
 void i2c_safe_write_scan_bus(uint8_t start_addr, uint8_t stop_addr){
     while ( start_addr <= stop_addr){
         if (!i2c_safe_start((start_addr<<1)|I2C_WRITE)){
+            send_uint16(start_addr);
+            send_newline();
+        }
+        start_addr++;
+    }
+}/*i2c_safe_write_scan_bus*/
+
+/**
+    @brief      Scan the I2C bus for acknowledging devices in read mode
+    @param      start_addr 7 bit I2C address to start scanning at (highest value)
+    @param      stop_addr  7 bit I2C address at which to stop scanning
+    @return     address    7 bit I2C address of acknowledging device
+    TODO: Place these in an array (of unknown size) to remove dependency on usart.h
+*/
+void i2c_read_scan_bus(uint8_t start_addr, uint8_t stop_addr){
+    while ( start_addr <= stop_addr){
+        if (!i2c_start((start_addr<<1)|I2C_READ)){
+            send_uint16(start_addr);
+            send_newline();
+        }
+        start_addr++;
+    }
+}/*i2c_safe_read_scan_bus*/
+
+
+/**
+    @brief      Scan the I2C bus for acknowledging devices in write mode
+    @param      start_addr 7 bit I2C address to start scanning at (highest value)
+    @param      stop_addr  7 bit I2C address at which to stop scanning
+    @return     address    7 bit I2C address of acknowledging device
+    TODO: Place these in an array (of unknown size) to remove dependency on usart.h
+*/
+void i2c_write_scan_bus(uint8_t start_addr, uint8_t stop_addr){
+    while ( start_addr <= stop_addr){
+        if (!i2c_start((start_addr<<1)|I2C_WRITE)){
             send_uint16(start_addr);
             send_newline();
         }

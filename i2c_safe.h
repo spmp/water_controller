@@ -96,6 +96,66 @@ extern void i2c_start_wait(unsigned char addr);
 */
 extern unsigned char i2c_write(unsigned char data);
 
+/** Safe I2C read Ack
+ @brief         Read one byte from the I2C d*evic*e, request more data from device
+                and return error if communication times out.
+ @retval        byte read from I2C device if no timeout
+*/
+unsigned char i2c_readAck(void);
+
+/**
+    @brief      Safe I2C read Nak
+    @details    Read one byte from the I2C device, read is followed by a stop condition
+                and return error if communication times out.
+    @retval     byte read from I2C device if no timeout,
+*/
+unsigned char i2c_readNak(void);
+
+/** 
+    @brief Terminates the data transfer and releases the I2C bus 
+    @param void
+    @return none
+*/
+extern void i2c_safe_stop(void);
+
+
+/** 
+    @brief Issues a start condition and sends address and transfer direction 
+    
+    @param    addr address and transfer direction of I2C device
+    @retval   0   device accessible 
+    @retval   1   failed to access device 
+*/
+extern unsigned char i2c_safe_start(unsigned char addr);
+
+
+/**
+    @brief Issues a repeated start condition and sends address and transfer direction 
+    
+    @param   addr address and transfer direction of I2C device
+    @retval  0 device accessible
+    @retval  1 failed to access device
+*/
+extern unsigned char i2c_safe_rep_start(unsigned char addr);
+
+
+/**
+    @brief Issues a start condition and sends address and transfer direction 
+     
+    If device is busy, use ack polling to wait until device ready 
+    @param    addr address and transfer direction of I2C device
+    @return   none
+*/
+extern void i2c_safe_start_wait(unsigned char addr);
+
+
+/**
+    @brief Send one byte to I2C device
+    @param    data  byte to be transfered
+    @retval   0 write successful
+    @retval   1 write failed
+*/
+extern unsigned char i2c_safe_write(unsigned char data);
 
 /** @brief      Safe I2C read Ack
     @details    Read one byte from the I2C d*evice, request more data from
@@ -162,4 +222,8 @@ extern unsigned char i2c_write(unsigned char data);
     TODO: Place these in an array (of unknown size) to remove dependency on usart.h
 */
  void i2c_safe_write_scan_bus(uint8_t start_addr, uint8_t stop_addr);
+ 
+void i2c_read_scan_bus(uint8_t start_addr, uint8_t stop_addr);
+ 
+void i2c_write_scan_bus(uint8_t start_addr, uint8_t stop_addr);
  

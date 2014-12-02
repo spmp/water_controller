@@ -5,7 +5,7 @@ void init_hardware(void ) {
     WD_SET(WD_OFF);
     init_clock();
     init_usart(38400, F_CPU);   //Initialise USART with speed 38400baude
-    i2c_init(400000,F_CPU);     //Initilise I^2C with speed 100kHz
+    i2c_init(1000,F_CPU);     //Initilise I^2C with speed 100kHz
     init_io_ports();            //Initialise IO ports
     WD_SET(WD_RST,WDTO_4S);
 }

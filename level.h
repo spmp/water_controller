@@ -8,7 +8,7 @@
 #define TANK_RADIUS 175.0
 #define TANK_LENGTH 2000.0
 #define VOLUME_LINEAR_FACTOR (M_PI*TANK_RADIUS*TANK_LENGTH/2000)
-#define LEVEL_ZERO_DEFAULT 316
+#define LEVEL_ZERO_DEFAULT 403
 
 /** @brief      Hardware abstraction for level
     @details    Reads the level from whatever device is being used. As much as 

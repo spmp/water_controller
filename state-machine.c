@@ -69,9 +69,9 @@ struct Program program[NUM_PROGRAM] = {
 	  .level_min = 5,         // The minimum allowable level of water in the tank
 	  .level_fill = 350,        // The level to fill the tank to\
 	  /* Temperature settings */
-	  .temperature_settemp = 6500,
-	  .temperature_set_1 = 6500,  // The temperature to which the system will automatically be heated
-	  .temperature_set_2 = 6000,
+	  .temperature_settemp = 7000,
+	  .temperature_set_1 = 7000,  // The temperature to which the system will automatically be heated
+	  .temperature_set_2 = 6500,
 	  .temperature_max = 9000,    // Maximum temperature to maintain
 	  .temperature_min = 500,    // Minimum temperature to maintain
 	  /* Smarts */
@@ -129,7 +129,7 @@ void get_state(struct Program *program) {
     
     /* Application Specific: */
     //Get Water controller input states
-    inputs->temperature = temperature(); // do something useful like: read_temperature();
+//     inputs->temperature = temperature(); // do something useful like: read_temperature();
     inputs->level = level();
     inputs->volume = volume(inputs->level);
     //Get Water controller output states
