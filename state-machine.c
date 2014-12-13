@@ -64,10 +64,10 @@ struct Program program[NUM_PROGRAM] = {
 	  .time_to_hot_2 = 21600,     // Time (2) to have tank at set temp by
           .morning_fill_time = 36000, // Time at which to check whether to fill the tank or not
 	  /* Level settings */
-	  .level_full = 350,        // The level of a full tank. Do not exceed 8) // possibly hard wired
+	  .level_full = 286,        // The level of a full tank. Do not exceed 8) // possibly hard wired
 	  .level_heater_min = 40,  // The minimum safe level for running the heating elements
 	  .level_min = 5,         // The minimum allowable level of water in the tank
-	  .level_fill = 350,        // The level to fill the tank to\
+	  .level_fill = 286,        // The level to fill the tank to\
 	  /* Temperature settings */
 	  .temperature_settemp = 7000,
 	  .temperature_set_1 = 7000,  // The temperature to which the system will automatically be heated
@@ -129,7 +129,7 @@ void get_state(struct Program *program) {
     
     /* Application Specific: */
     //Get Water controller input states
-//     inputs->temperature = temperature(); // do something useful like: read_temperature();
+    inputs->temperature = temperature(); // do something useful like: read_temperature();
     inputs->level = level();
     inputs->volume = volume(inputs->level);
     //Get Water controller output states

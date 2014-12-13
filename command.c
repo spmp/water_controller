@@ -575,6 +575,23 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             send_uint16(read_MCP3221());
             send_newline();
             break;
+        case 'q': //testing read_MCP3221
+            send_string_p(PSTR("Level is:"));
+            send_uint16(level());
+            send_newline();
+            break;
+        case 'Q': //Go Crazy!
+            send_string_p(PSTR("Going Crazy on processsed level!!!"));
+            uint16_t poos;
+            poos =10000;
+            while (poos > 0){
+                send_uint16(level());
+                send_newline();
+                wd_reset();
+                _delay_ms(250);
+                poos--;
+            }
+            break;
         case 'C': //Go Crazy!
             send_string_p(PSTR("Going Crazy on level!!!"));
             uint16_t poo;
@@ -583,9 +600,11 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             fart = read_MCP3221(); //give us 8x origina reading
             while (poo > 0){
                 //Use averaging over 8 numbers
-                fart = ((fart*7 + read_MCP3221() )>>3);
+                //fart = read_MCP3221(); 
+	        fart = ((fart*7 + read_MCP3221() )>>3);
                 send_uint16(fart);
                 send_newline();
+	        wd_reset();
                 _delay_ms(250);
                 poo--;
             }

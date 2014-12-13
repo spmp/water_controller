@@ -12,6 +12,7 @@
 #include "level.h"
 #include "state-machine.h"
 #include "hardware.h"
+#include "wd.h"
 
 extern uint8_t send_mcusr_flag;
 
