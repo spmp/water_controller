@@ -18,7 +18,7 @@ uint16_t temperature(void){
      4.    Use the maximal value
      5.    Average all sensors within some error of maximum
      */ 
-    int32_t temp1 = read_AT30TSE758(TEMP_SENSOR1_ADDRESS);
+//     int32_t temp1 = read_AT30TSE758(TEMP_SENSOR1_ADDRESS);
     int32_t temp2 = read_AT30TSE758(TEMP_SENSOR2_ADDRESS);
     int32_t temp3 = read_AT30TSE758(TEMP_SENSOR3_ADDRESS);
 //1.
@@ -28,7 +28,8 @@ uint16_t temperature(void){
 //3.
 //     uint16_t temp_avr = ((temp1+temp2+temp3)/3);
 //4.
-    int32_t temp_max = MAX(temp3,MAX(temp1,temp2));
+//     int32_t temp_max = MAX(temp3,MAX(temp1,temp2));
+    int32_t temp_max = MAX(temp2,temp3);
 //5.
 //     uint16_t temp_graded_average = ;
     if (temp_max <=0){

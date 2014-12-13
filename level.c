@@ -21,13 +21,11 @@ uint16_t level( void ){
 //         return 0;
 //     }
     uint16_t level = read_MCP3221();
-    if (level >= 931)
+    if (level <= level_sensor_zero/0.1384)
         level = 0;
-    else if (level >= 136){
-        level = -0.1515364813*level+141.1978940436;
-    }
     else {
-        level = 3238.979297876*pow(level,-0.6697217671);
+        level = 0.1384*level-level_sensor_zero;
+//         level = 0.13877*level-125 // Run 3 from data
     }
     return level;  
     //TODO: do this with bit shift, ie modify 133 etc
