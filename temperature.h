@@ -8,7 +8,8 @@
  */
 
 #include <avr/io.h>
-#include "i2c_safe.h"
+#include "AVR-lib/i2c_safe.h"
+#include "AVR-lib/usart.h"
 
 // I2C sensor addresses
 #ifndef TEMP_SENSOR1_ADDRESS

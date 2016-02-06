@@ -13,7 +13,7 @@
 
 
 # ========== Edit below here ========= #
-SOURCES = main.c clock.c usart.c temperature.c level.c command.c state-machine.c i2c_safe.c log.c hardware.c
+SOURCES = AVR-lib/ds18x20.c AVR-lib/i2c_safe.c AVR-lib/onewire.c AVR-lib/usart.c clock.c command.c level.c log.c state-machine.c temperature.c hardware.c main.c
 PORT = /dev/ttyUSB*
 # BAUD_RATE = 57600
 BAUD_RATE = 115200
@@ -43,7 +43,7 @@ all: $(WORKDIR) $(WORKDIR)/$(TARGET).hex
 
 subdirs: $(WORKDIR)
 $(WORKDIR):
-	mkdir -p $@
+	mkdir -p $@ $@/AVR-lib
 
 # uploading the hex file to the AVR
 upload: all

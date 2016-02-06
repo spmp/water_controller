@@ -1,18 +1,22 @@
 /*Application specific commands to handle USART input strings */
 #pragma once
-# include <avr/pgmspace.h>
+#include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <stdlib.h>
 #include <util/delay.h>
-#include "usart.h"
-#include "temperature.h"
-#include "i2c_safe.h"
-#include "log.h"
+#include "AVR-lib/i2c_safe.h"
+#include "AVR-lib/usart.h"
 #include "clock.h"
-#include "level.h"
-#include "state-machine.h"
 #include "hardware.h"
+#include "level.h"
+#include "log.h"
+#include "state-machine.h"
+#include "temperature.h"
 #include "wd.h"
+
+#define CRP "c "         //Response prefix, last line
+#define CRp "c "         //Response prefix, n-1 lines
+#define CRS " x"         //Response suffix (followed by /r/n)
 
 extern uint8_t send_mcusr_flag;
 

@@ -2,8 +2,8 @@
 #include <avr/io.h>
 
 /* AVR specifics */
-#include "i2c_safe.h"
-#include "usart.h"
+#include "AVR-lib/i2c_safe.h"
+#include "AVR-lib/usart.h"
 #include "clock.h"
 #include "wd.h"
 

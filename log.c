@@ -1,4 +1,3 @@
-
 #include "log.h"
 
 uint8_t logenable = LOG_ENABLE; //logging enabled/disabled at startup

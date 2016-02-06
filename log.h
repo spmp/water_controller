@@ -1,6 +1,6 @@
 #pragma once
 #include <avr/io.h>
-#include "usart.h"
+#include "AVR-lib/usart.h"
 #include "clock.h"
 #include "state-machine.h"
 

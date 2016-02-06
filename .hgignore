@@ -10,5 +10,9 @@ syntax: glob
 outtakes.c
 Outtakes
 
+# Git
+.git/*
+
 syntax: regexp
 \.[s,d,b]\#\d
+

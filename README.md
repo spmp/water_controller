@@ -4,7 +4,7 @@ Water Controller
 The aim of this project is to control and monitor a water heating system.
 This is currently a **Work in Progress**, and it is largely incomplete.
 
-The project consists of three main parts:
+The project will consist of four main parts:
 
   1. An atmega328 MCU with a control system that directly interfaces with
      the water heater. It also operates over a serial interface to interact
@@ -16,14 +16,17 @@ The project consists of three main parts:
 
   3. A web application that can display logs from the database, and can
      control the MCU via the daemon.
+     
+  4. A schematic and PCB artwork.
+
+Currently only (1) is functional.
+
+The _driveres_ for the project are in `AVR-lib`. At this stage I am (slowly) moving to github for issue tracking etc.
 
 MCU
 ---
 
-In development I use an Arduino Duemilanove, which has been a useful testbed
-so far. The board takes its power directly from the USB cable attached to
-the dev PC, so setup is minimal. To run the project, you will need to do the
-following:
+The project uses the Arduino Nano for both prototyping and target operation. To upload the code do the following:
 
  1. Plug in the MCU via USB to your computer. Check that `lsusb` shows the
     device, and that /dev/ttyUSB0 is writable (add your user to that device's
@@ -38,14 +41,13 @@ following:
 
 At present, the MCU reads data from the following inputs:
 
- * 10 bit analog-in on ADC3
- * ultrasonic distance sensor (HC-SR04)
- * _more to come_
+ * Pressure sensor (MPXV4006 I think...) via 12 bit I2C ADC (MPXV4006)
+ * Temperature sensors (DS18B20) via OW to I2C (DS2482-100) (WIP)
 
 These are sent over the serial interface to the PC along with a "timestamp" (the
 number of seconds since the program started) at regular intervals.
 
-To view the output, run `screen /dev/ttyUSB0 57600` (exit with `C-a k y`).
+To view the output, run `screen /dev/ttyUSB0 38400` (exit with `C-a k y`).
 
 Logging daemon (logger.py)
 --------------------------
@@ -85,4 +87,31 @@ where it serves the files to localhost:8080.
 The web page should also contain some commands to directly control the MCU.
 These will be sent via the web backend to the logging daemon and from there
 on to the MCU.
+
+Circuit
+-------
+
+In brief: The Arduino nano plugs into the circuit board, reads its inputs from I2C, sending serial out via a MAX232. The heaters and pump are controlled via zero crossing triac driver and triacs. The filler solenoid is controlled via logic level fet. All outputs can be disabled, overwridden, or be controlled via MCU with a three position toggle switch. LED's indicate the output state, and the MCU flashes politely when operating. DC power is supplied by a 12V smps.
+
+The circuit and artwork are in ```cad``` and ```eagle``` respectivly.
+
+Issues
+------
+* The I2C driver needs a major upate which must happen in tandem with this (and all other dependent projects) to support a separate error state with recovery.
+* If an I2C error in level is detected it must:
+    1. Report 0mm
+    2. Turn off heaters
+    3. Turn off filler
+    4. Turn off pump
+    5. Raise a _level_ error flag in USART output
+    
+* If an error in temperature is detected it must:
+    1. Report 0deg cent.
+    2. Turn off heater
+    3. Raise a _temperature_ error flag in USART output
+    
+Normal operation must continue once normal sensing is restored.
+
+* Fill time detection and auto off. Sometimes the filler does not turn off correctl due to I2C errors or misreading. To avoid a flooded yard whilst on holiday a maximum fill time needs to be obeyed, taking into account a complete fill _with_ the pump on. If this time (`MAX_FILL_TIME`) is exceeded the filler must be disabled and not re-enabled unless done so manually via USART.
+
 

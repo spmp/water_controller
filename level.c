@@ -1,6 +1,4 @@
 #include "level.h"
-#include <math.h>
-#include "i2c_safe.h"
 
 uint16_t level_sensor_zero = LEVEL_ZERO_DEFAULT;
 

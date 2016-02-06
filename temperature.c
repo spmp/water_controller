@@ -1,9 +1,5 @@
 #include "temperature.h"
 
-#include <avr/io.h>
-#include "i2c_safe.h"
-#include "usart.h"
-
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 

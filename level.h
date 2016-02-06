@@ -4,6 +4,8 @@
  */
 
 #include <avr/io.h>
+#include <math.h>
+#include "AVR-lib/i2c_safe.h"
 
 #define TANK_RADIUS 175.0
 #define TANK_LENGTH 2000.0

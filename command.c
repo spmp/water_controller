@@ -15,6 +15,13 @@ const char test_string_s[] PROGMEM = "s"CRS"\r\n";
 const char test_string_degc[] PROGMEM = "°Cx100"CRS"\r\n";
 const char test_string_kWh[] PROGMEM = "kWh"CRS"\r\n";
 
+/**
+ @brief send_string() wrapper for command response suffix
+ */
+void send_newline_crs(){
+    send_string_p(PSTR(CRS"\r\n"));
+}
+
 /* Parse null terminated string with expected format:
  * <single letter command><command value>
  * ie: t130400 to set time to 13:04:00
