@@ -6,14 +6,18 @@ uint8_t Wloaded;
 uint8_t send_mcusr_flag = 0 ;
 
 /* Fixed text strings */
-const char test_string_LastLinePrefix[] PROGMEM = CRP;
-const char test_string_LinePrefix[] PROGMEM = CRp;
-const char test_string_LastLineSuffix[] PROGMEM = CRS;
-const char test_string_mm[] PROGMEM = "mm"CRS"\r\n";
-const char test_string_L[] PROGMEM = "L"CRS"\r\n";
-const char test_string_s[] PROGMEM = "s"CRS"\r\n";
-const char test_string_degc[] PROGMEM = "°Cx100"CRS"\r\n";
-const char test_string_kWh[] PROGMEM = "kWh"CRS"\r\n";
+const char string_LastLinePrefix[] PROGMEM = CRP;
+const char string_LinePrefix[] PROGMEM = CRp;
+const char string_LastLineSuffix[] PROGMEM = CRS;
+const char string_mm[] PROGMEM = "mm"CRS"\r\n";
+const char string_L[] PROGMEM = "L"CRS"\r\n";
+const char string_s[] PROGMEM = "s"CRS"\r\n";
+// Must manually edit
+int16_t TEMPMULTIPLIER = TEMPERATUREMULTIPLIER/10000;
+// const char string_degc[] PROGMEM = "°Cx10"CRS"\r\n";
+const char string_degc[] PROGMEM = "°C"CRS"\r\n";
+const char string_kWh[] PROGMEM = "kWh"CRS"\r\n";
+
 
 /**
  @brief send_string() wrapper for command response suffix
@@ -89,13 +93,13 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
         case 'L': //logging
             if (commandvalue != 1){
                 disable_logging();
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Logging disabled, enable with 'L1'."));
                 send_newline_crs();
             }
             else {
                 enable_logging();
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Logging enabled, disable with 'L'."));
                 send_newline_crs();
             }
@@ -104,13 +108,13 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
         case 'S': //State machine
             if (commandvalue != 1){
                 disable_state_machine();
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("State machine disabled, enable with 'S1'."));
                 send_newline_crs();
             }
             else {
                 enable_state_machine();
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("State machine enabled, disable with 'S'."));
                 send_newline_crs();
             }
@@ -119,13 +123,13 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
         case 'F': //Filler
             if (commandvalue != 1){
                 settings->fill_enable = 0;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Filler disabled, enable with 'F1'."));
                 send_newline_crs();
             }
             else {
                 settings->fill_enable = 1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Filler enabled, disable with 'F0'."));
                 send_newline_crs();
             }
@@ -134,13 +138,13 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
         case 'H': //Heater
             if (commandvalue != 1){
                 settings->heater_enable = 0;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Heater disabled, enable with 'H1'."));
                 send_newline_crs();
             }
             else {
                 settings->heater_enable = 1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Heater enabled, disable with 'H0'."));
                 send_newline_crs();
             }
@@ -149,13 +153,13 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
         case 'P': //Pump
             if (commandvalue != 1){
                 settings->pump_enable = 0;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Pump disabled, enable with 'P1'."));
                 send_newline_crs();
             }
             else {
                 settings->pump_enable = 1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Pump enabled, disable with 'P0'."));
                 send_newline_crs();
             }
@@ -164,7 +168,7 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
         case 'f': //Fill the tank
             if (commandvalue == 0){
                 inputs->fill_now = 1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Filling the tank to "));
                 send_uint16(settings->level_fill);
                 send_string_p(PSTR(" mm"CRS"\r\n"));
@@ -172,7 +176,7 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             else {
                 settings->level_fill = commandvalue;
                 inputs->fill_now = 1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Filling the tank to "));
                 send_uint16(commandvalue);
                 send_string_p(PSTR(" mm"CRS"\r\n"));
@@ -192,39 +196,39 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             break;
             */
         case 'j':
-            send_string_p(test_string_LastLinePrefix);
+            send_string_p( string_LastLinePrefix );
             send_string_p(PSTR("Heating the tank to "));
             heater_set(commandvalue);
-            send_string_p(test_string_degc);
+            send_string_p(string_degc);
             break;
             
         case 'b': //Heat the tank
             if (commandvalue == 0){
                 inputs->boost_now = 1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Heating the tank to "));
-                send_uint16(settings->temperature_settemp);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_settemp/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             else {
-                settings->temperature_settemp = commandvalue;
+                settings->temperature_settemp = commandvalue*TEMPMULTIPLIER;
                 inputs->boost_now = 1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Heating the tank to "));
-                send_uint16(settings->temperature_settemp);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_settemp/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             break;
             
         case 't': //Time
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("The time is: "));
                 send_uint32_half(timestamp);
                 send_newline_crs();
             }
             else {
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting the time to "));
                 send_uint32_half(commandvalue);
                 send_newline_crs();
@@ -234,32 +238,32 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
            
         case 'T':  //Temperature
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("The temperature is: "));
-                send_uint16(inputs->temperature);
-                send_string_p(test_string_degc);
+                send_uint16(inputs->temperature/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             else {
-                settings->temperature_settemp = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                settings->temperature_settemp = commandvalue*TEMPMULTIPLIER;
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting temperature setpoint to "));
-                send_uint16(settings->temperature_settemp);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_settemp/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             break;
             
         case 'l':  //Level
-            send_string_p(test_string_LastLinePrefix);
+            send_string_p( string_LastLinePrefix );
             send_string_p(PSTR("The level is "));
             send_uint16(inputs->level);
-            send_string_p(test_string_mm);
+            send_string_p( string_mm );
             break;
                 
         case 'v':  //Volume
-            send_string_p(test_string_LastLinePrefix);
+            send_string_p( string_LastLinePrefix );
             send_string_p(PSTR("The volume is "));
             send_uint16(inputs->volume);
-            send_string_p(test_string_L);
+            send_string_p(string_L);
             break;
             
         //Time and temp to hot
@@ -267,130 +271,130 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             if ( commandvalue != 0 ){
                 settings->time_to_hot_1 = commandvalue;
             }
-            send_string_p(test_string_LastLinePrefix);
+            send_string_p( string_LastLinePrefix );
             send_string_p(PSTR("Setting time_to_hot_1 to "));
             send_uint16(settings->time_to_hot_1);
-            send_string_p(test_string_s);
+            send_string_p(string_s);
             break;
             
         case 'y': //time_to_hot_1 settemp
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setpoint temperature 1 is: "));
-                send_uint16(settings->temperature_set_1);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_set_1/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             else {
-                settings->temperature_set_1 = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                settings->temperature_set_1 = commandvalue*TEMPMULTIPLIER;
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting setpoint temperature 1 to "));
-                send_uint16(settings->temperature_set_1);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_set_1/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             break;
             
         case 'U': //Time to hot 2
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("The time_to_hot_2 is: "));
                 send_uint16(settings->time_to_hot_2);
-                send_string_p(test_string_s);
+                send_string_p(string_s);
             }
             else {
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 settings->time_to_hot_2 = commandvalue;
                 send_string_p(PSTR("Setting time_to_hot_2 to "));
                 send_uint16(settings->time_to_hot_2);
-                send_string_p(test_string_s);
+                send_string_p(string_s);
             }
             break;
             
         case 'u': //time_to_hot_2 settemp
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setpoint temperature 2 is: "));
-                send_uint16(settings->temperature_set_2);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_set_2/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             else {
-                send_string_p(test_string_LastLinePrefix);
-                settings->temperature_set_2 = commandvalue;
+                send_string_p( string_LastLinePrefix );
+                settings->temperature_set_2 = commandvalue*TEMPMULTIPLIER;
                 send_string_p(PSTR("Setting setpoint temperature 2 to "));
-                send_uint16(settings->temperature_set_2);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_set_2/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             break;
             
         case 'M': //Maximum level
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Current maximum level is: "));
                 send_uint16(settings->level_full);
-                send_string_p(test_string_mm);
+                send_string_p( string_mm );
             }
             else {
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 settings->level_full = commandvalue;
                 send_string_p(PSTR("Setting maximum level to "));
                 send_uint16(settings->level_full);
-                send_string_p(test_string_mm);
+                send_string_p( string_mm );
             }
             break;
             
         case 'm': //Minimum level
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Current minimum level is: "));
                 send_uint16(settings->level_min);
-                send_string_p(test_string_mm);
+                send_string_p( string_mm );
             }
             else {
                 settings->level_min = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting minimum level to "));
                 send_uint16(settings->level_min);
-                send_string_p(test_string_mm);
+                send_string_p( string_mm );
             }
             break;
             
         case 'J': //Heater minimum level
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Current heater minimum level is: "));
                 send_uint16(settings->level_heater_min);
-                send_string_p(test_string_mm);
+                send_string_p( string_mm );
             }
             else {
                 settings->level_heater_min = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting heater minimum level to "));
                 send_uint16(settings->level_heater_min);
-                send_string_p(test_string_mm);
+                send_string_p( string_mm );
             }
             break;
             
         case 'N': //Current fill level
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Current fill level is: "));
                 send_uint16(settings->level_fill);
-                send_string_p(test_string_mm);
+                send_string_p( string_mm );
             }
             else {
                 settings->level_fill = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting fill level to "));
                 send_uint16(settings->level_fill);
-                send_string_p(test_string_mm);
+                send_string_p( string_mm );
             }
             break;
             
         case 'n': //Current fill level in liters
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Current fill level is: "));
                 send_uint16(settings->level_fill);
-                send_string_p(test_string_L);
+                send_string_p(string_L);
             }
 //             else { //Not doing as no need for this inverse transform to be in the micro
 //                 //                 settings->level_fill = commandvalue;
@@ -403,101 +407,101 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             
         case 'G': //Maximum temperature 
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Maximum temperature is: "));
-                send_uint16(settings->temperature_max);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_max/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             else {
-                settings->temperature_max = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                settings->temperature_max = commandvalue*TEMPMULTIPLIER;
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting maximum temperature to "));
-                send_uint16(settings->temperature_max);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_max/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             break;
             
         case 'g': //Minimum temperature 
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Minimum temperature is: "));
-                send_uint16(settings->temperature_min);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_min/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             else {
-                settings->temperature_min = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                settings->temperature_min = commandvalue*TEMPMULTIPLIER;
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting minimum temperature to "));
-                send_uint16(settings->temperature_min);
-                send_string_p(test_string_degc);
+                send_uint16(settings->temperature_min/TEMPMULTIPLIER);
+                send_string_p(string_degc);
             }
             break;
             
         case 's': //Midday sun
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Midday by the sun is at "));
                 send_uint16(settings->midsun);
-                send_string_p(test_string_s);
+                send_string_p(string_s);
             }
             else {
                 settings->midsun = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting midday by the sun to "));
                 send_uint16(settings->midsun);
-                send_string_p(test_string_s);
+                send_string_p(string_s);
             }
             break;
             
         case 'd': //Daily heating potential
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Daily heating potential is "));
                 send_uint16(settings->daily_heat_potential);
-                send_string_p(test_string_kWh);
+                send_string_p(string_kWh);
             }
             else {
                 settings->midsun = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting daily heating potential to "));
                 send_uint16(settings->daily_heat_potential);
-                send_string_p(test_string_kWh);
+                send_string_p(string_kWh);
             }
             break;
             
         case 'z': //Zero level
             if ( commandvalue == 0 ){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Level zero is: "));
-                send_uint16(level_sensor_zero);
+                send_uint32(level_sensor_zero);
                 send_newline_crs();
             }
             else {
                 level_sensor_zero = commandvalue;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Level zero is: "));
                 send_uint16(level_sensor_zero);
                 send_newline_crs();
             }
             break;
-//                 send_string_p(test_string_LastLinePrefix);
+//                 send_string_p(string_LastLinePrefix);
 //                 send_string_p(PSTR("WTF!!\r\n"));
 // //                 level();
 // //                 level_zero();
-//                 send_string_p(test_string_LastLinePrefix);
+//                 send_string_p(string_LastLinePrefix);
 //                 send_string_p(PSTR("Zeroing the level.\r\n"));
 //             break;
             
         case 'o': //Program to run
             if ( commandvalue == 0 || commandvalue > NUM_PROGRAM){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("The running program is number "));
                 send_char('1'+state_machine_program);
                 send_newline_crs();
             }
             else {
                 state_machine_program = commandvalue-1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Running program switched to "));
                 send_char('1'+state_machine_program);
                 send_newline_crs();
@@ -506,14 +510,14 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             
         case 'O': //Program to configure
             if ( commandvalue == 0 || commandvalue > NUM_PROGRAM){
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("The program being configured is "));
                 send_char('1'+state_machine_config_program);
                 send_newline_crs();
             }
             else {
                 state_machine_config_program = commandvalue-1;
-                send_string_p(test_string_LastLinePrefix);
+                send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Now configuring program "));
                 send_char('1'+state_machine_config_program);
                 send_newline_crs();
@@ -522,35 +526,6 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
                 
         case 'W':  //Watchdog reset
             send_mcusr_flag =1;
-            break;
-            
-        //Temperature sensors
-        case 'A': //Intitialise AT30TSE758
-            send_string_p(PSTR("Initilaising AT30TSE758 sensor 1...\r\n"));
-//             init_AT30TSE758(commandvalue);
-            if ( !init_AT30TSE758(TEMP_SENSOR1_ADDRESS) ){
-                send_string_p(PSTR("Success."));
-            }
-            else {
-                send_string_p(PSTR("Failed!"));
-            }
-            send_newline();
-            send_string_p(PSTR("Initilaising AT30TSE758 sensor 2...\r\n"));
-            if ( !init_AT30TSE758(TEMP_SENSOR2_ADDRESS) ){
-                send_string_p(PSTR("Success."));
-            }
-            else {
-                send_string_p(PSTR("Failed!"));
-            }
-            send_newline();
-            send_string_p(PSTR("Initilaising AT30TSE758 sensor 3...\r\n"));
-            if ( !init_AT30TSE758(TEMP_SENSOR3_ADDRESS) ){
-                send_string_p(PSTR("Success."));
-            }
-            else {
-                send_string_p(PSTR("Failed!"));
-            }
-            send_newline();
             break;
             
         ////////////////////////////////////////////////    
@@ -568,13 +543,6 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             send_uint16(commandvalue);
             send_newline();
             send_uint16(i2c_safe_read_sixteen(commandvalue, 0x0) );
-            send_newline();
-            break;
-        case 'Z': //testing read_AT30TSE758
-            send_string_p(PSTR("read_AT30TSE758 , from address:"));
-            send_uint16(commandvalue);
-            send_newline();
-            send_uint16(read_AT30TSE758(commandvalue));
             send_newline();
             break;
         case 'X': //testing read_MCP3221
@@ -621,9 +589,10 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             uint16_t wee;
             wee =10000;
             while (wee > 0){
-                send_uint16(temperature());
+                send_uint32(temperature());
                 send_newline();
                 poo--;
+                wd_reset();
             }
             break;
         case 'V':

@@ -11,28 +11,28 @@
 #include "log.h"
 
 // Watchdog and reset state.
-// "You're not suppose to call get_mcusr() in main().
-// "the attribute section(".init3") puts the code in before main() so it runs automatically before entering main().
-// NOTE: The following code _MAY_ work without bootloader, but WILL NOT work with bootlaoder
 /*
-uint8_t mcusr_mirror __attribute__ ((section (".noinit")));
-void get_mcusr(void) \
-__attribute__((naked)) \
-__attribute__((section(".init3")));
-void get_mcusr(void)
-{
-mcusr_mirror = MCUSR;
-MCUSR = 0;
-wdt_disable();
-}
-*/
-// NOTE: This code will work with a recent version of 'optiboot' as the bootloader:
+ * First, we need a variable to hold the reset cause that can be written before
+ * early sketch initialization (that might change r2), and won't be reset by the
+ * various initialization code.
+ * avr-gcc provides for this via the ".noinit" section.
+ */
 uint8_t resetFlags __attribute__ ((section(".noinit")));
-void resetFlagsInit(void) __attribute__ ((naked)) __attribute__ ((section (".init0")));
+
+/*
+ * Next, we need to put some code to save reset cause from the bootload (in r2)
+ * to the variable.  Again, avr-gcc provides special code sections for this.
+ */
+void resetFlagsInit(void) __attribute__ ((naked))
+                          __attribute__ ((section (".init0")));
 void resetFlagsInit(void)
 {
-  // save the reset flags passed from the bootloader
-  __asm__ __volatile__ ("mov %0, r2\n" : "=r" (resetFlags) :);
+  /*
+   * save the reset flags passed from the bootloader
+   * This is a "simple" matter of storing (STS) r2 in the special variable
+   * that we have created.  We use assembler to access the right variable.
+   */
+  __asm__ __volatile__ ("sts %0, r2\n" : "=m" (resetFlags) :);
 }
 
 uint8_t send_log = 0;
@@ -49,7 +49,7 @@ void medium_timestep() {
 
 int main() {    
     cli();
-    init_hardware();
+    init_hardware(&program[state_machine_program]);
     set_sleep_mode(SLEEP_MODE_IDLE);
     wd_reset();
     
@@ -61,10 +61,39 @@ int main() {
     send_uint16(resetFlags);
     send_string_p(PSTR(" x\r\n"));
 
-    
-    //AT30TSE758_init(0x48);
-    
-//     DDRB |= (1 << DDB5);
+    // Watchdog reset status
+    /*
+    * check for the usual bits.  Note that the symnbols defined in wdt.h are
+    * bit numbers, so they have to be shifted before comparison.
+    */
+/*
+    if (resetFlags & (1<<WDRF))
+    {
+        send_string_p(PSTR(" Watchdog"));
+        resetFlags &= ~(1<<WDRF);
+    }
+    if (resetFlags & (1<<BORF))
+    {
+        send_string_p(PSTR(" Brownout"));
+        resetFlags &= ~(1<<BORF);
+    }
+    if (resetFlags & (1<<EXTRF))
+    {
+        send_string_p(PSTR(" External"));
+        resetFlags &= ~(1<<EXTRF);
+    }
+    if (resetFlags & (1<<PORF))
+    {
+        send_string_p(PSTR(" PowerOn"));
+        resetFlags &= ~(1<<PORF);
+    }
+    if (resetFlags != 0x00)
+    {
+        // It should never enter here
+        send_string_p(PSTR(" Unknown"));
+    }
+    send_newline();
+*/    
     
     //Set timer callbacks
     clock_set_seconds_callback(&once_per_second);
@@ -76,10 +105,19 @@ int main() {
     //Enable Global interrupts
     sei();
 
-    disable_state_machine();        // Debugging. Will do this if MCUSR is not 0
-    disable_logging();              // Debugging
+    if (STATEMACHINEENABLEDONSTART) {
+        enable_state_machine();
+    } else {
+        disable_state_machine();        // Debugging. Will do this if MCUSR is not 0
+    }
+    if (LOGGINGENABLEDONSTART) {
+        enable_logging();
+    } else {
+        disable_logging();              // Debugging
+    }
 
 //     // Debugging
+
 //     if(send_mcusr_flag){
 //         send_string_p(PSTR("c Watchdog Status MCUSR:"));
 //         send_uint16(resetFlags);

@@ -51,6 +51,8 @@ upload: all
 	$(AVRDUDE) -p $(MCU) -c $(AVRDUDE_PROGRAMMER) -P $(PORT) \
 	-b $(BAUD_RATE) \
 	-D -Uflash:w:$(WORKDIR)/$(TARGET).hex:i
+# alias for install:
+install: upload
 
 # cleaning up
 clean:

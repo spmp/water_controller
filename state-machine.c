@@ -69,11 +69,11 @@ struct Program program[NUM_PROGRAM] = {
 	  .level_min = 5,         // The minimum allowable level of water in the tank
 	  .level_fill = 286,        // The level to fill the tank to\
 	  /* Temperature settings */
-	  .temperature_settemp = 7000,
-	  .temperature_set_1 = 7000,  // The temperature to which the system will automatically be heated
-	  .temperature_set_2 = 6500,
-	  .temperature_max = 9000,    // Maximum temperature to maintain
-	  .temperature_min = 500,    // Minimum temperature to maintain
+	  .temperature_settemp = 70*TEMPERATUREMULTIPLIER,
+	  .temperature_set_1 = 70*TEMPERATUREMULTIPLIER,  // The temperature to which the system will automatically be heated
+	  .temperature_set_2 = 65*TEMPERATUREMULTIPLIER,
+	  .temperature_max = 90*TEMPERATUREMULTIPLIER,    // Maximum temperature to maintain
+	  .temperature_min = 5*TEMPERATUREMULTIPLIER,    // Minimum temperature to maintain
 	  /* Smarts */
 	  .daily_heat_potential = 0,      // How much energy to expect in a day
 	  .midsun = 43200,            // Time at which the sun was/is at its peak
@@ -240,19 +240,27 @@ void calculate_outputs(struct Program *program) {
                 *   What we have:
                 *       Cp (water ) = 4.1855 J/(gK)     (SPECIFIC_HEAT_WATER/1000)
                 *       Density water = 1000g/L
-                *       Heating = 3000W                 (HEATER_SIZE)
+                *       Heating = 3000W                   (HEATER_SIZE)
                 *       Volume = L
-                *       deltaT = K*1000 (temperature measurements are in Kx1000)
+                *       deltaT = K*10000 (temperature measurements are in K x 10,000)
                 *       W = J/s
                 *  So we want to get Seconds out so need:
-                *       s = 1/W(s/J) x Cp(J/(gK)) x denisty(1000g/L) x Volume(L) x deltaT(K*1000)
-                *               Combining the 1000 into Cp gives Cp x 1000 = 4186
-                *       s = Cp*Volume*deltaT/(W*1000)
-                *  BUT with a 32bit unisnged integer, the worst case scenario overflows the numberator,
-                *  i.e numberator(s)_max = 4186*300*100*1000 > 2^32
-                *       But if we reduce the SPECIFIC_HEAT_WATER by a factor of 10 to 418 and decrease the denominator it all fits!
-                *  So now have:
-                *       s = Cp*100 x Volume x deltaT *1000 / (W * 100)
+                *       s = (Cp(J/(gK)) x denisty(1000g/L) x Volume(L) x deltaT(K*10000) )/(W*10000)
+                * In order to avoid floating point operations we want to ensure
+                *  that the numberator never overflows then do integer devision
+                *
+                * With a 32bit unsinged integer
+                * numberator_max = (4.186*1000*300*120) is all good,
+                * but our maximum temperature and deltaT is x 10000 which is not
+                *  so good.
+                * Can it be broken down: (4186*300/3000) then x deltaT*10000 then
+                *  divide by 10000
+                * Lets take worst case again: deltaT is 120K, V is 300, W is 2400
+                * With floats s = 62790
+                * In groups of integer arithmatic:
+                * (4186*300/2400) = 523 <2^32 x 1,200,000 = 6.27e8 , 2^32 / 10000
+                * = 62760 < 2^32 Sweet and off by 60 seconds
+                * 
                 *  Now, the timing diagram looks like this:
                 * 
                 *         ^time    TTH1 Midnight TTH2
@@ -260,7 +268,9 @@ void calculate_outputs(struct Program *program) {
                 *          Caclulated time to heat
                 *  When the time to heat + the current time (modulo 24 hours) is greater than the current time we turn on the heaters!
                 */
-                howlongtoheat = (SPECIFIC_HEAT_WATER / 10) * inputs->volume * (settings->temperature_set_1 - inputs->temperature) / (HEATER_SIZE * 100);
+                howlongtoheat = SPECIFIC_HEAT_WATER * inputs->volume / HEATER_SIZE;
+                howlongtoheat = howlongtoheat * (settings->temperature_set_1 - inputs->temperature);
+                howlongtoheat = howlongtoheat / TEMPERATUREMULTIPLIER;
                                 
                 uint32_t howlong = (settings->time_to_hot_1 + 24*60*60 - timestamp) % 24*60*60;             //How long until time_to_hot_1 in seconds
                 
