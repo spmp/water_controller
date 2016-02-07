@@ -56,8 +56,7 @@ int main() {
     //TODO: Read settings from EEprom
     
     //Send initialisation message:
-    // TODO: This will show how many resets... after the R
-    send_string_p(PSTR("Rx Solar Hotwater Controller. V:2.5.1. Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8): "));
+    send_string_p(PSTR("Rx Solar Hotwater Controller. V:2.6.1. Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8): "));
     send_uint16(resetFlags);
     send_string_p(PSTR(" x\r\n"));
 
