@@ -13,7 +13,7 @@ const char string_mm[] PROGMEM = "mm"CRS"\r\n";
 const char string_L[] PROGMEM = "L"CRS"\r\n";
 const char string_s[] PROGMEM = "s"CRS"\r\n";
 // Must manually edit
-int16_t TEMPMULTIPLIER = TEMPERATUREMULTIPLIER/10000;
+int16_t TEMPMULTIPLIER = TEMPERATUREMULTIPLIER;
 // const char string_degc[] PROGMEM = "°Cx10"CRS"\r\n";
 const char string_degc[] PROGMEM = "°C"CRS"\r\n";
 const char string_kWh[] PROGMEM = "kWh"CRS"\r\n";

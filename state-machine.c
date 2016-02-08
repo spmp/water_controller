@@ -268,8 +268,9 @@ void calculate_outputs(struct Program *program) {
                 *          Caclulated time to heat
                 *  When the time to heat + the current time (modulo 24 hours) is greater than the current time we turn on the heaters!
                 */
-                howlongtoheat = SPECIFIC_HEAT_WATER * inputs->volume / HEATER_SIZE;
-                howlongtoheat = howlongtoheat * (settings->temperature_set_1 - inputs->temperature);
+                int32_t deltaT = (settings->temperature_set_1 - inputs->temperature);
+                howlongtoheat = ( SPECIFIC_HEAT_WATER * inputs->volume ) / HEATER_SIZE;
+                howlongtoheat = howlongtoheat * (uint32_t)deltaT;
                 howlongtoheat = howlongtoheat / TEMPERATUREMULTIPLIER;
                                 
                 uint32_t howlong = (settings->time_to_hot_1 + 24*60*60 - timestamp) % 24*60*60;             //How long until time_to_hot_1 in seconds
@@ -284,6 +285,7 @@ void calculate_outputs(struct Program *program) {
         else
         {
             outputs->heater = 0; 
+            howlongtoheat = 0;
         }
     }
     /* Stop conditions not met, set heater output off */

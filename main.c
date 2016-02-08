@@ -10,6 +10,8 @@
 #include "command.h"
 #include "log.h"
 
+#define VERSION "2.6.2"
+
 // Watchdog and reset state.
 /*
  * First, we need a variable to hold the reset cause that can be written before
@@ -56,7 +58,7 @@ int main() {
     //TODO: Read settings from EEprom
     
     //Send initialisation message:
-    send_string_p(PSTR("Rx Solar Hotwater Controller. V:2.6.1. Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8): "));
+    send_string_p(PSTR("Rx Solar Hotwater Controller. V:"VERSION".\r\n Jasper Aorangi/Brendan Bycroft 2014. Have a nice day, and a great shower 8): "));
     send_uint16(resetFlags);
     send_string_p(PSTR(" x\r\n"));
 
