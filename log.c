@@ -33,8 +33,8 @@ void log_to_serial(struct Program *program) {
         send_string_p(PSTR(" H "));
 //         send_char('0'+heater_state());
         send_char('0'+settings->heater_enable);
-        send_string_p(PSTR(" OP "));
-        send_uint16(OUTPUT_PORT);
+        send_string_p(PSTR(" E "));
+        send_uint8(error_state);
         send_string_p(PSTR(" T2H "));
         send_uint32(howlongtoheat);
         send_newline();

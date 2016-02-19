@@ -25,9 +25,11 @@
  */
 
 uint32_t howlongtoheat = 0;
+uint32_t filltimecount = 0;
 uint8_t begin_state_machine_flag = 0;
 uint8_t state_machine_running_flag = 0;
 uint8_t state_machine_enable = 1;               //enabled by default
+uint8_t error_state = 0;
 
 /* Running program */
 uint8_t state_machine_program = DEFAULT_PROGRAM; //Default start up program
@@ -60,27 +62,28 @@ const struct Settings program_default PROGMEM = {
 // initialise and Populate `Programmes' with initial data:
 struct Program program[NUM_PROGRAM] = {
     {{0},{0},{
-          .time_to_hot_1 = 64800,     // Time (1) to have tank at set temp by
-	  .time_to_hot_2 = 21600,     // Time (2) to have tank at set temp by
-          .morning_fill_time = 36000, // Time at which to check whether to fill the tank or not
-	  /* Level settings */
-	  .level_full = 286,        // The level of a full tank. Do not exceed 8) // possibly hard wired
-	  .level_heater_min = 40,  // The minimum safe level for running the heating elements
-	  .level_min = 5,         // The minimum allowable level of water in the tank
-	  .level_fill = 286,        // The level to fill the tank to\
-	  /* Temperature settings */
-	  .temperature_settemp = 70*TEMPERATUREMULTIPLIER,
-	  .temperature_set_1 = 70*TEMPERATUREMULTIPLIER,  // The temperature to which the system will automatically be heated
-	  .temperature_set_2 = 65*TEMPERATUREMULTIPLIER,
-	  .temperature_max = 90*TEMPERATUREMULTIPLIER,    // Maximum temperature to maintain
-	  .temperature_min = 5*TEMPERATUREMULTIPLIER,    // Minimum temperature to maintain
-	  /* Smarts */
-	  .daily_heat_potential = 0,      // How much energy to expect in a day
-	  .midsun = 43200,            // Time at which the sun was/is at its peak
-	  /* Output settings */
-	  .pump_enable = 1,
-	  .fill_enable = 1,
-	  .heater_enable = 0
+        .time_to_hot_1 = 64800,     // Time (1) to have tank at set temp by
+        .time_to_hot_2 = 21600,     // Time (2) to have tank at set temp by
+        .morning_fill_time = 36000, // Time at which to check whether to fill the tank or not
+        /* Level settings */
+        .level_full = 286,        // The level of a full tank. Do not exceed 8) // possibly hard wired
+        .level_heater_min = 40,  // The minimum safe level for running the heating elements
+        .level_min = 5,         // The minimum allowable level of water in the tank
+        .level_fill = 286,        // The level to fill the tank to\
+        /* Temperature settings */
+        .temperature_settemp = 70*TEMPERATUREMULTIPLIER,
+        .temperature_set_1 = 70*TEMPERATUREMULTIPLIER,  // The temperature to which the system will automatically be heated
+        .temperature_set_2 = 65*TEMPERATUREMULTIPLIER,
+        .temperature_max = 90*TEMPERATUREMULTIPLIER,    // Maximum temperature to maintain
+        .temperature_min = 5*TEMPERATUREMULTIPLIER,    // Minimum temperature to maintain
+        /* Smarts */
+        .daily_heat_potential = 0,      // How much energy to expect in a day
+        .midsun = 43200,            // Time at which the sun was/is at its peak
+        /* Output settings */
+        .pump_enable = 1,
+        .fill_enable = 1,
+        .heater_enable = 0,
+        .fill_max_time = FILL_MAX_TIME
         }
     }
 //       64800,21600,350,40,5,350,65,65,60,80,10,0,43200,1,1,0}}/*,
@@ -197,17 +200,31 @@ void calculate_outputs(struct Program *program) {
             if ( timestamp == settings->morning_fill_time ){     // Time to fill 8)
                 outputs->fill = 1;
             }
-            if (outputs->fill) {        // We are filling, better figure out when to turn off
-                if ((inputs->level >= settings->level_full)||(inputs->level >= settings->level_fill)) {      // Full or overfull! Turn off
+            // We are filling, better figure out when to turn off
+            if (outputs->fill) {
+                // Check how long we have been filling
+                filltimecount++; 
+                // If we have been filling too long disable filling and error
+                // The *5 is due to medium timestep
+                if (filltimecount >= (settings->fill_max_time)*
+                        (CLOCK_TICKS_PER_SECOND/MEDIUM_TIME_INTERVAL)) {
+                    filltimecount = 0;
+                    outputs->fill = 0;
+                    settings->fill_enable = 0;
+                    // Set the fill
+                    error_state |= (1<<5);
+                }
+                // Full or overfull! Turn off
+                if ((inputs->level >= settings->level_full) || 
+                        (inputs->level >= settings->level_fill)) {
                     outputs->fill = 0;
                 }
-            }
-//             else if ((inputs->level <= settings->level_min) || inputs->fill_now) {    // Level low, start filling
-            else if ((inputs->level <= settings->level_min)||inputs->fill_now) {    // Level low, start filling
+            // Low level or fill now, so start filling!
+            } else if ((inputs->level <= settings->level_min) ||
+                    inputs->fill_now) {
                 outputs->fill = 1;
             }
-        }
-        else {
+        } else {
             outputs->fill = 0;          // Filling is disabled, turn off the filler
         }
         inputs->fill_now = 0;         //reset fill_now flag

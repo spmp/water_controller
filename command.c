@@ -54,40 +54,40 @@ void command_from_serial(char commandname, uint32_t commandvalue, struct Program
     switch(commandname) {
         //Help!
         case 'h': //Disable logging
-            send_string_p(PSTR(CRp"Help! Available commands.\r\n" \
-CRp"            Commands are case sensetive letters followed by a number (commandvalue) with no space\r\n" \
-CRp"            Default commandvalue is 0 if not given\r\n" \
-CRp"            \t l: Level (mm)\r\n" \
-CRp"            \t v: Volume (L)\r\n" \
-CRp"            1 Enable/0 Disable:\r\n" \
-CRp"            \t L: Logging\r\n" \
-CRp"            \t S: State machine\r\n" \
-CRp"            \t F: Fill\r\n" \
-CRp"            \t H: Heat\r\n" \
-CRp"            \t P: Pump\r\n" \
-CRp"            0 get value/Other Set value:\r\n" \
-CRp"            \t t: Time (s)\r\n" \
-CRp"            \t T: Temperature (°C)\r\n" \
-CRp"            \t f: Fill now (or to level)\r\n" \
-CRp"            \t b: Boost now (or to temp)\r\n" \
-CRp"            \t Y: TimeToHot1\r\n" \
-CRp"            \t y: temp TTH1\r\n" \
-CRp"            \t U: TTH2\r\n" \
-CRp"            \t u: temp TTH2\r\n" \
-CRp"            \t M: Max level\r\n" \
-CRp"            \t m: Min level\r\n" \
-CRp"            \t J: Heater min level\r\n" \
-CRp"            \t N: Fill level\r\n" \
-CRp"            //\t n: Fill level liters\r\n" \
-CRp"            \t G: Max temp\r\n" \
-CRp"            \t g: Min temp\r\n" \
-CRp"            \t s: Midsun\r\n" \
-CRp"            \t d: DHP (kWh)\r\n" \
-CRp"            \t z: Zero the level\r\n" \
-CRp"            \t O: Progam to configure\r\n" \
-CRp"            \t o: Running program\r\n" \
-CRP"            \t C: Config dump \r\n" \
-CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
+            send_string_p(PSTR(CRH"Help! Available commands.\r\n" \
+CRH"            Commands are case sensetive letters followed by a number (commandvalue) with no space\r\n" \
+CRH"            Default commandvalue is 0 if not given\r\n" \
+CRH"            \t l: Level (mm)\r\n" \
+CRH"            \t v: Volume (L)\r\n" \
+CRH"            1 Enable/0 Disable:\r\n" \
+CRH"            \t L: Logging\r\n" \
+CRH"            \t S: State machine\r\n" \
+CRH"            \t F: Fill\r\n" \
+CRH"            \t H: Heat\r\n" \
+CRH"            \t P: Pump\r\n" \
+CRH"            0 get value/Other Set value:\r\n" \
+CRH"            \t t: Time (s)\r\n" \
+CRH"            \t T: Temperature (°C)\r\n" \
+CRH"            \t f: Fill now (or to level)\r\n" \
+CRH"            \t b: Boost now (or to temp)\r\n" \
+CRH"            \t Y: TimeToHot1\r\n" \
+CRH"            \t y: temp TTH1\r\n" \
+CRH"            \t U: TTH2\r\n" \
+CRH"            \t u: temp TTH2\r\n" \
+CRH"            \t M: Max level\r\n" \
+CRH"            \t m: Min level\r\n" \
+CRH"            \t J: Heater min level\r\n" \
+CRH"            \t N: Fill level\r\n" \
+CRH"            \t n: Max fill time\r\n" \
+CRH"            \t G: Max temp\r\n" \
+CRH"            \t g: Min temp\r\n" \
+CRH"            \t s: Midsun\r\n" \
+CRH"            \t d: DHP (kWh)\r\n" \
+CRH"            \t z: Zero the level\r\n" \
+CRH"            \t O: Progam to configure\r\n" \
+CRH"            \t o: Running program\r\n" \
+CRH"            \t r: reset error flag \r\n" \
+CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             break;
             
         case 'L': //logging
@@ -389,20 +389,27 @@ CRP"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             }
             break;
             
-        case 'n': //Current fill level in liters
+        case 'n': //Current maximum fill time in seconds
             if ( commandvalue == 0 ){
                 send_string_p( string_LastLinePrefix );
-                send_string_p(PSTR("Current fill level is: "));
-                send_uint16(settings->level_fill);
-                send_string_p(string_L);
+                send_string_p(PSTR("Current maximum fill time is: "));
+                send_uint16(settings->fill_max_time);
+                send_string_p(string_s);
             }
-//             else { //Not doing as no need for this inverse transform to be in the micro
-//                 //                 settings->level_fill = commandvalue;
-//                 send_string_p(PSTR("Setting fill level to "));
-//                 //                 send_uint16(settings->level_fill);
-//                 send_string_p(PSTR("liters."));
-//                 send_newline();
-//             }
+            else {
+                send_string_p( string_LastLinePrefix );
+                send_string_p(PSTR("Setting max fill time to "));
+                settings->fill_max_time = commandvalue;
+                send_uint16(settings->fill_max_time);
+                send_string_p(string_s);
+            }
+            break;
+            
+        case 'r': //Current maximum fill time in seconds
+            send_string_p( string_LastLinePrefix );
+            send_string_p(PSTR("Resetting error register"));
+            error_state = 0;
+            send_newline_crs();
             break;
             
         case 'G': //Maximum temperature 

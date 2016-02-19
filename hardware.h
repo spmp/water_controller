@@ -17,6 +17,10 @@
  * things and stuff like that.
  */
 
+/* Clock and timing settings, time in 1/125's of a second*/
+#define MEDIUM_TIME_INTERVAL    25
+#define FAST_TIME_INTERVAL      5
+
 /* Data buss settings   */
 // USART
 #define USARTBAUD       38400
@@ -46,6 +50,9 @@
 /* Heater size */
 #define HEATER_SIZE     2400L
 #define SPECIFIC_HEAT_WATER 4186L
+
+/* Fill timer */
+#define FILL_MAX_TIME 1920
 
 /* State machine defaults */
 #define STATEMACHINEENABLEDONSTART 1

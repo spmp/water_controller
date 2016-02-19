@@ -14,9 +14,10 @@
 #include "temperature.h"
 #include "wd.h"
 
-#define CRP "c "         //Response prefix, last line
-#define CRp "c "         //Response prefix, n-1 lines
-#define CRS " x"         //Response suffix (followed by /r/n)
+#define CRH "h "        //Help prefix
+#define CRP "c "        //Response prefix, last line
+#define CRp "c "        //Response prefix, n-1 lines
+#define CRS " x"        //Response suffix (followed by /r/n)
 
 extern uint8_t send_mcusr_flag;
 

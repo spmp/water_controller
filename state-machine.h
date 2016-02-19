@@ -11,7 +11,9 @@ extern uint8_t state_machine_running_flag;
 #define NUM_PROGRAM 1          //Number of programs
 extern uint8_t state_machine_program ;
 extern uint8_t state_machine_config_program ;
-
+// Error state by bit as:
+//  | reserved | reserved | fill | heat | level | temp | I2C | OW |
+extern uint8_t error_state ;
 
 struct Inputs {
     
@@ -69,6 +71,8 @@ struct Settings {
     uint8_t pump_enable;
     uint8_t fill_enable;
     uint8_t heater_enable;
+    /* Error checking */
+    uint16_t fill_max_time;
 };
 
 struct Program {

@@ -2,8 +2,13 @@
 #include <avr/io.h>
 
 /* Medium and fast time intervals in 1/125'th of a second */
+#define CLOCK_TICKS_PER_SECOND  125 // DONT CHANGE, place holder not configable
+#ifndef MEDIUM_TIME_INTERVAL
 #define MEDIUM_TIME_INTERVAL    25
+#endif
+#ifndef FAST_TIME_INTERVAL
 #define FAST_TIME_INTERVAL      5
+#endif
 
 /* Resources: Timer/Counter 2 */
 
