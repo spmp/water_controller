@@ -1,7 +1,7 @@
 #pragma once
 #include <avr/io.h>
+#include "AVR-lib/clock.h"
 #include "AVR-lib/usart.h"
-#include "clock.h"
 #include "state-machine.h"
 
 #ifndef LOG_ENABLE

@@ -2,15 +2,15 @@
 #include <avr/io.h>
 
 /* AVR specifics */
+#include "AVR-lib/clock.h"
 #include "AVR-lib/ds18x20.h"
 #include "AVR-lib/i2c_safe.h"
 #include "AVR-lib/usart.h"
-#include "clock.h"
+#include "AVR-lib/wd.h"
 #include "state-machine.h"
-#include "wd.h"
 
 /* DEBUGGING - i.e no environmental measurements */
-#define DEBUGGING
+// #define DEBUGGING
 
 /* Inputs */
 #include "temperature.h"//Temperature reading

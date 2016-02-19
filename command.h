@@ -4,15 +4,10 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <util/delay.h>
-#include "AVR-lib/i2c_safe.h"
-#include "AVR-lib/usart.h"
-#include "clock.h"
 #include "hardware.h"
 #include "level.h"
 #include "log.h"
-#include "state-machine.h"
 #include "temperature.h"
-#include "wd.h"
 
 #define CRH "h "        //Help prefix
 #define CRP "c "        //Response prefix, last line

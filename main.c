@@ -4,13 +4,12 @@
 #include <util/delay.h>
 
 #include "hardware.h"
-#include "wd.h"
 
 #include "state-machine.h"
 #include "command.h"
 #include "log.h"
 
-#define VERSION "2.6.5"
+#define VERSION "2.6.6"
 
 // Watchdog and reset state.
 /*

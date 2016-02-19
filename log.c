@@ -21,17 +21,14 @@ void log_to_serial(struct Program *program) {
         send_string_p(PSTR(" p "));
         send_char('0'+outputs->pump);
         send_string_p(PSTR(" P "));
-//         send_char('0'+pump_state());
         send_char('0'+settings->pump_enable);
         send_string_p(PSTR(" f "));
         send_char('0'+outputs->fill);
         send_string_p(PSTR(" F "));
         send_char('0'+settings->fill_enable);
-//         send_char('0'+fill_state());
         send_string_p(PSTR(" h "));
         send_char('0'+outputs->heater);
         send_string_p(PSTR(" H "));
-//         send_char('0'+heater_state());
         send_char('0'+settings->heater_enable);
         send_string_p(PSTR(" E "));
         send_uint8(error_state);
