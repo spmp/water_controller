@@ -9,6 +9,9 @@
 #include "state-machine.h"
 #include "wd.h"
 
+/* DEBUGGING - i.e no environmental measurements */
+#define DEBUGGING
+
 /* Inputs */
 #include "temperature.h"//Temperature reading
 #include "level.h"      //Level and volume reading

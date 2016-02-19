@@ -37,6 +37,10 @@ void log_to_serial(struct Program *program) {
         send_uint8(error_state);
         send_string_p(PSTR(" T2H "));
         send_uint32(howlongtoheat);
+#ifdef DEBUGGING
+        send_string_p(PSTR(" HL "));
+        send_uint32((settings->time_to_hot_1 + 86400L - timestamp)%(86400L));
+#endif
         send_newline();
     }
 }

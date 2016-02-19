@@ -132,8 +132,10 @@ void get_state(struct Program *program) {
     
     /* Application Specific: */
     //Get Water controller input states
+#ifndef DEBUGGING
     inputs->temperature = temperature(); // do something useful like: read_temperature();
     inputs->level = level();
+#endif
     inputs->volume = volume(inputs->level);
     //Get Water controller output states
     outputs->pump = pump_state();
@@ -290,7 +292,7 @@ void calculate_outputs(struct Program *program) {
                 howlongtoheat = howlongtoheat * (uint32_t)deltaT;
                 howlongtoheat = howlongtoheat / TEMPERATUREMULTIPLIER;
                                 
-                uint32_t howlong = (settings->time_to_hot_1 + 24*60*60 - timestamp) % 24*60*60;             //How long until time_to_hot_1 in seconds
+                uint32_t howlong = (settings->time_to_hot_1 + 86400L - timestamp)%(86400L);             //How long until time_to_hot_1 in seconds
                 
                 if ( howlongtoheat >= howlong) {
                     settings->temperature_settemp = settings->temperature_set_1;

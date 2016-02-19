@@ -234,31 +234,38 @@ CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
                 send_newline_crs();
                 timestamp = commandvalue;
             }
-            break;
-           
+            break;      
         case 'T':  //Temperature
             if ( commandvalue == 0 ){
                 send_string_p( string_LastLinePrefix );
-                send_string_p(PSTR("The temperature is: "));
-                send_uint16(inputs->temperature/TEMPMULTIPLIER);
+                send_string_p(PSTR("The set temperature is: "));
+                send_uint16(settings->temperature_settemp/TEMPMULTIPLIER);
                 send_string_p(string_degc);
             }
             else {
+#ifndef DEBUGGING     
                 settings->temperature_settemp = commandvalue*TEMPMULTIPLIER;
                 send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting temperature setpoint to "));
                 send_uint16(settings->temperature_settemp/TEMPMULTIPLIER);
                 send_string_p(string_degc);
+#else
+                inputs->temperature = commandvalue*TEMPMULTIPLIER;
+#endif
             }
             break;
             
         case 'l':  //Level
+#ifndef DEBUGGING  
             send_string_p( string_LastLinePrefix );
             send_string_p(PSTR("The level is "));
             send_uint16(inputs->level);
             send_string_p( string_mm );
+#else
+            inputs->level = commandvalue;
+#endif
             break;
-                
+
         case 'v':  //Volume
             send_string_p( string_LastLinePrefix );
             send_string_p(PSTR("The volume is "));
@@ -637,7 +644,5 @@ CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             outputs->heater = commandvalue ;
             //             pump_set(commandvalue);
             break;
-            
-
     }
 }
