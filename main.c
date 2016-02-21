@@ -46,6 +46,9 @@ void long_timestep() {
 void once_per_second() {
     send_log = 1;
     PORTB ^= (1 << PORTB5); //Toggle LED
+    if (timestamp == 0) {
+        analytics_reset();
+    }
 }
 
 void medium_timestep() {
