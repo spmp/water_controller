@@ -2,6 +2,7 @@
 #include <avr/io.h>
 #include "AVR-lib/clock.h"
 #include "AVR-lib/usart.h"
+#include "analytics.h"
 #include "state-machine.h"
 
 #ifndef LOG_ENABLE

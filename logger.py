@@ -21,36 +21,53 @@ import datetime
 
 class Logger:
     def __init__(self, dbname):
+        print("Initialising logger database")
+        
         self.conn = sqlite3.connect(dbname)
         self.cur = self.conn.cursor()
 
-        self.cur.execute("""
-            create table if not exists source (
-                name varchar(20)
-            )""")
+        #self.cur.execute("""
+            #create table if not exists source (
+                #name varchar(20)
+            #)""")
 
         self.cur.execute("""
-            create table if not exists data_point (
+            create table if not exists hotwaterdata (
                 time timestamp,
-                source_id references source(rowid),
                 temperature real,
-                distance real,
-                analog1 real
+                level real,
+                volume real,
+                pumpState integer,
+                fillState integer,
+                heatState integer,
+                tth real
             )""")
-
-    def add_data_point(self, timestamp, temperature, distance, analog1):
-        print("adding", timestamp, temperature, distance, analog1)
-        self.cur.execute('insert into data_point values (?, ?, ?, ?, ?)',
-                (timestamp, 0, float(temperature), float(distance), float(analog1)))
+        
+    #def secondsConvertHMS(self, seconds):
+        
+        
+    def add_data_point(self, timestamp, temperature, level, volume, pumpState,
+                       fillState, heatState, tth):
+        print("adding", timestamp, temperature, level, volume, pumpState,
+              fillState, heatState, tth, "to db")
+        self.cur.execute(
+            'insert into hotwaterdata values (?, ?, ?, ?, ?, ?, ?, ?)', 
+            (timestamp, float(temperature), float(level), float(volume), 
+             int(pumpState), int(fillState), int(heatState))
+        )
 
         self.conn.commit()
 
-    def add_from_string(self, s):
-        m = re.match(b"a (?P<t>\d+) (?P<distance>\d+) (?P<analog1>\d+)", s)
+    def add_from_string(self, st):
+        rx = "l\s+(?P<time>\d+)\st\s(?P<temperature>\d+) l (?P<level>\d+) v (?P<volume>\d+) p (?P<pump>\d) P \d f (?P<fill>\d) F \d h (?P<heat>\d) H \d OP \d+ T2H (?P<tth>\d+)"
+        m = re.match(rx, st)
         if m is None:
-            print("unable parse data_point:", s)
+            print("unable parse data_point:", st)
             return
-        self.add_data_point(datetime.datetime.now(), 30, m.group('distance'), m.group('analog1'))
+        self.add_data_point(
+            m.group('time'), m.group('temperature'), m.group('level'),
+            m.group('volume'), m.group('pump'), m.group('fill'),
+            m.group('heat'))
 
 
 if __name__ == '__main__':
@@ -67,8 +84,10 @@ if __name__ == '__main__':
 
     ser = serial.Serial()
     ser.port = '/dev/ttyUSB0'
-    ser.baudrate = 57600
+    ser.baudrate = 38400
     ser.open()
+    
+    print("Serial port opened ", file=sys.stderr)
 
     tty_atmega = pyuv.TTY(loop, ser.fileno(), True)
     tty_stdin = pyuv.TTY(loop, sys.stdin.fileno(), True)

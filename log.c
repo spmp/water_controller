@@ -30,6 +30,8 @@ void log_to_serial(struct Program *program) {
         send_char('0'+outputs->heater);
         send_string_p(PSTR(" H "));
         send_char('0'+settings->heater_enable);
+        send_string_p(PSTR(" W "));
+        send_uint16(daily_solar_gain);
         send_string_p(PSTR(" E "));
         send_uint8(error_state);
         send_string_p(PSTR(" T2H "));

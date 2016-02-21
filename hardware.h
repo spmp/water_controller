@@ -12,6 +12,12 @@
 /* DEBUGGING - i.e no environmental measurements */
 // #define DEBUGGING
 
+/* State machine defaults */
+#define STATEMACHINEENABLEDONSTART 1
+#define LOGGINGENABLEDONSTART 1
+#define HEATERENABLEDONSTART 1
+#define ANALYTICSENABLEDONSTART 1
+
 /* Inputs */
 #include "temperature.h"//Temperature reading
 #include "level.h"      //Level and volume reading
@@ -21,6 +27,7 @@
  */
 
 /* Clock and timing settings, time in 1/125's of a second*/
+#define LONG_TIME_INTERVAL      7500L    // Every minute
 #define MEDIUM_TIME_INTERVAL    25
 #define FAST_TIME_INTERVAL      5
 
@@ -57,10 +64,6 @@
 /* Fill timer */
 #define FILL_MAX_TIME 1920
 
-/* State machine defaults */
-#define STATEMACHINEENABLEDONSTART 1
-#define LOGGINGENABLEDONSTART 1
-#define HEATERENABLEDONSTART 1
 
 /* Initialise all hardware relevant to the project, usart, i2c, clock, external
  * sensors, Everyting!

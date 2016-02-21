@@ -5,11 +5,12 @@
 
 #include "hardware.h"
 
+#include "analytics.h"
 #include "state-machine.h"
 #include "command.h"
 #include "log.h"
 
-#define VERSION "2.6.6"
+#define VERSION "2.7.0"
 
 // Watchdog and reset state.
 /*
@@ -38,6 +39,10 @@ void resetFlagsInit(void)
 
 uint8_t send_log = 0;
 
+void long_timestep() {
+    analytics_begin_flag = 1;
+}
+
 void once_per_second() {
     send_log = 1;
     PORTB ^= (1 << PORTB5); //Toggle LED
@@ -46,7 +51,6 @@ void once_per_second() {
 void medium_timestep() {
     begin_state_machine_flag = 1;
 }
-
 
 int main() {    
     cli();
@@ -96,6 +100,7 @@ int main() {
 */    
     
     //Set timer callbacks
+    clock_set_long_time_callback(&long_timestep);
     clock_set_seconds_callback(&once_per_second);
     clock_set_medium_time_callback(&medium_timestep);
     
@@ -115,14 +120,11 @@ int main() {
     } else {
         disable_logging();              // Debugging
     }
-
-//     // Debugging
-
-//     if(send_mcusr_flag){
-//         send_string_p(PSTR("c Watchdog Status MCUSR:"));
-//         send_uint16(resetFlags);
-//         send_string_p(PSTR(" x"));
-//     }
+    if (ANALYTICSENABLEDONSTART) {
+        enable_analytics();
+    } else {
+        disable_analytics();              // Debugging
+    }
         
     for (;;) {
         sleep_mode(); // blocked until after an interrupt has fired
@@ -132,18 +134,22 @@ int main() {
             handle_single_char_from_serial();
         }
         
+        //Analytics
+//         if (analytics_begin_flag) {
+//             analytics_begin_flag = 0;
+//             analytics_run(&program[state_machine_program]);
+//         }
+        
         //State machine 
-        if ( begin_state_machine_flag ) {
+        if (begin_state_machine_flag) {
             begin_state_machine_flag = 0;
             state_machine(&program[state_machine_program]);
-//             state_machine(&program);
         }
         
         //Logging
         if (send_log) {
             send_log = 0;
             log_to_serial(&program[state_machine_program]);
-//             log_to_serial(&program);
         }
         
         //Reset the watchdog
