@@ -62,6 +62,7 @@ CRH"            \t v: Volume (L)\r\n" \
 CRH"            1 Enable/0 Disable:\r\n" \
 CRH"            \t L: Logging\r\n" \
 CRH"            \t S: State machine\r\n" \
+CRH"            \t A: Analytics\r\n" \
 CRH"            \t F: Fill\r\n" \
 CRH"            \t H: Heat\r\n" \
 CRH"            \t P: Pump\r\n" \
@@ -117,6 +118,21 @@ CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
                 enable_state_machine();
                 send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("State machine enabled, disable with 'S'."));
+                send_newline_crs();
+            }
+            break;
+            
+        case 'A': //Analytics
+            if (commandvalue != 1){
+                disable_analytics();
+                send_string_p( string_LastLinePrefix );
+                send_string_p(PSTR("Analytics disabled, enable with 'A1'."));
+                send_newline_crs();
+            }
+            else {
+                enable_analytics();
+                send_string_p( string_LastLinePrefix );
+                send_string_p(PSTR("Analytics enabled, disable with 'A[0]'."));
                 send_newline_crs();
             }
             break;
