@@ -27,9 +27,7 @@
  */
 
 /* Clock and timing settings, time in 1/125's of a second*/
-#define LONG_TIME_INTERVAL      CLOCK_TICKS_PER_SECOND    // Every minute
-#define MEDIUM_TIME_INTERVAL    25
-#define FAST_TIME_INTERVAL      5
+#define LONG_TIME_INTERVAL          CLOCK_TICKS_PER_SECOND*60L
 
 /* Data buss settings   */
 // USART

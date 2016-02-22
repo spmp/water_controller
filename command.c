@@ -87,6 +87,7 @@ CRH"            \t z: Zero the level\r\n" \
 CRH"            \t O: Progam to configure\r\n" \
 CRH"            \t o: Running program\r\n" \
 CRH"            \t r: reset error flag \r\n" \
+CRH"            \t R: reset daily energy gain \r\n" \
 CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             break;
             
@@ -412,10 +413,17 @@ CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             }
             break;
             
-        case 'r': //Current maximum fill time in seconds
+        case 'r': //Reset the error register
             send_string_p( string_LastLinePrefix );
             send_string_p(PSTR("Resetting error register"));
             error_state = 0;
+            send_newline_crs();
+            break;
+            
+        case 'R': //Reset the daily energy gain
+            send_string_p( string_LastLinePrefix );
+            send_string_p(PSTR("Resetting daily solar gain"));
+            analytics_reset();
             send_newline_crs();
             break;
             
@@ -552,13 +560,13 @@ CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             send_newline();
             send_string_p(PSTR("completed\r\n"));
             break;
-        case 'R': //testing i2c_safe_read_sixteen
-            send_string_p(PSTR("I2C safe: Reading 16 bits from register 0x0, from address:"));
-            send_uint16(commandvalue);
-            send_newline();
-            send_uint16(i2c_safe_read_sixteen(commandvalue, 0x0) );
-            send_newline();
-            break;
+//         case 'R': //testing i2c_safe_read_sixteen
+//             send_string_p(PSTR("I2C safe: Reading 16 bits from register 0x0, from address:"));
+//             send_uint16(commandvalue);
+//             send_newline();
+//             send_uint16(i2c_safe_read_sixteen(commandvalue, 0x0) );
+//             send_newline();
+//             break;
         case 'X': //testing read_MCP3221
             send_string_p(PSTR("read_MCP3221 from pressure sensor. code is:"));
             send_uint16(read_MCP3221());

@@ -13,7 +13,7 @@
 
 
 # ========== Edit below here ========= #
-SOURCES = AVR-lib/ds18x20.c AVR-lib/i2c_safe.c AVR-lib/onewire.c AVR-lib/usart.c AVR-lib/clock.c analytics.c command.c level.c log.c state-machine.c temperature.c hardware.c main.c
+SOURCES =  hardware.c analytics.c command.c level.c log.c state-machine.c temperature.c main.c AVR-lib/ds18x20.c AVR-lib/i2c_safe.c AVR-lib/onewire.c AVR-lib/usart.c AVR-lib/clock.c
 PORT = /dev/ttyUSB*
 # BAUD_RATE = 57600
 BAUD_RATE = 115200

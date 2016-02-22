@@ -6,6 +6,7 @@ void init_hardware(struct Program *program) {
     wd_reset();
     WD_SET(WD_OFF);
     // Initialise clock
+    long_time_interval = LONG_TIME_INTERVAL;
     init_clock();
     // Initialise USART with speed USARTBAUDbaud
     init_usart(USARTBAUD, F_CPU);

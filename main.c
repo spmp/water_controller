@@ -10,7 +10,7 @@
 #include "command.h"
 #include "log.h"
 
-#define VERSION "2.7.0"
+#define VERSION "2.7.2"
 
 // Watchdog and reset state.
 /*
@@ -138,10 +138,10 @@ int main() {
         }
         
         //Analytics
-//         if (analytics_begin_flag) {
-//             analytics_begin_flag = 0;
-//             analytics_run(&program[state_machine_program]);
-//         }
+        if (analytics_begin_flag) {
+            analytics_begin_flag = 0;
+            analytics_run(&program[state_machine_program]);
+        }
         
         //State machine 
         if (begin_state_machine_flag) {
