@@ -23,9 +23,11 @@
  * 
  * 
  */
+#include "AVR-lib/usart.h"
 
 uint32_t howlongtoheat = 0;
 uint32_t filltimecount = 0;
+uint16_t fill_init_level = 0;
 uint8_t begin_state_machine_flag = 0;
 uint8_t state_machine_running_flag = 0;
 uint8_t state_machine_enable = 1;               //enabled by default
@@ -193,31 +195,50 @@ void calculate_outputs(struct Program *program) {
     
 //BEGIN fill
     /* The Fill logic */
-        if (settings->fill_enable) {    // Fill is enabled, so we can do something
-            /* Is it the time of the day to fill the tank? 
-             *  This algorythm needs to be smartened up when we are measuring daily heat potentials such that:
-             *          -# We enable filling at the morning fill time
-             *          -# Check whether the sun is actually heating the water before refilling
-             *   Will need another flag: waiting_for_morning_fill       */
-            if ( timestamp == settings->morning_fill_time ){     // Time to fill 8)
+        // Fill is enabled, so we can do something
+        if (settings->fill_enable) {
+            // Turn on the filler if the level is low, fill now, or it is time
+            if (
+                inputs->level <= settings->level_min ||     // Low level
+                inputs->fill_now ||                         // Fill now
+                timestamp == settings->morning_fill_time    // Fill time
+                //TODO: Or if analytics decides that we can fill and still
+                // maintain temperature at TTH1
+               ) 
+            {
+                // Enable filling
                 outputs->fill = 1;
+                //reset fill_now flag
+                inputs->fill_now = 0;
             }
             // We are filling, better figure out when to turn off
             if (outputs->fill) {
-                // Check how long we have been filling
-                filltimecount++; 
-                if ( 
-                    // If we have been filling too long disable filling and error
-                    // adjusting for the state machine time interval
-                    // Also if have been filling for 
-                    (filltimecount >= (settings->fill_max_time)*
-                        (CLOCK_TICKS_PER_SECOND/MEDIUM_TIME_INTERVAL)) 
-                    ||
-                    // OR the filler has been on for two minutes and the level is
-                    // still zero
-                    (filltimecount >= FILL_CHECK_TIME *
-                        (CLOCK_TICKS_PER_SECOND/MEDIUM_TIME_INTERVAL) &&
-                        inputs->level <= 0)
+                if (filltimecount == 0) fill_init_level = 0;
+                filltimecount++;
+
+                // Check filling, NOTE:Will fail if pump is stronger than filler
+                // Check every FILL_CHECK_TIME seconds for increase level
+                if (filltimecount%(FILL_CHECK_TIME *
+                        (CLOCK_TICKS_PER_SECOND/MEDIUM_TIME_INTERVAL)) == 0
+                ) {// Initialise fill_init_level if filltimecount is 0
+                    send_string_p(PSTR("Prev Lev is: "));
+                    send_uint16(fill_init_level);
+                    send_string_p(PSTR(", fill time count is: "));
+                    send_uint16(filltimecount);
+                    send_newline();
+                    // If level is not increasing disable filling and error
+                    if (inputs->level <= fill_init_level) {
+                        filltimecount = 0;
+                        outputs->fill = 0;
+                        settings->fill_enable = 0;
+                        // Set the fill error
+                        error_state |= (1<<5);
+                    }
+                    fill_init_level = inputs->level;
+                }      
+                // If we have been filling too long disable filling and error
+                if (filltimecount >= (settings->fill_max_time)*    // Seconds
+                        (CLOCK_TICKS_PER_SECOND/MEDIUM_TIME_INTERVAL)
                 ) {
                     filltimecount = 0;
                     outputs->fill = 0;
@@ -225,20 +246,22 @@ void calculate_outputs(struct Program *program) {
                     // Set the fill
                     error_state |= (1<<5);
                 }
+                
                 // Full or overfull! Turn off
-                if ((inputs->level >= settings->level_full) || 
-                        (inputs->level >= settings->level_fill)) {
+                if (
+                    inputs->level >= settings->level_full || 
+                    inputs->level >= settings->level_fill
+                ) {
+                    // Turn off filler
                     outputs->fill = 0;
+                    // Reset fill counter
+                    filltimecount = 0;
                 }
-            // Low level or fill now, so start filling!
-            } else if ((inputs->level <= settings->level_min) ||
-                    inputs->fill_now) {
-                outputs->fill = 1;
             }
+        // Filling is disabled, ensure the filler is off
         } else {
             outputs->fill = 0;          // Filling is disabled, turn off the filler
         }
-        inputs->fill_now = 0;         //reset fill_now flag
 //END fill
     
 //BEGIN heater

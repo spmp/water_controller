@@ -18,16 +18,20 @@
 #define HEATERENABLEDONSTART 1
 #define ANALYTICSENABLEDONSTART 1
 
-/* Inputs */
-#include "temperature.h"//Temperature reading
-#include "level.h"      //Level and volume reading
+/* Fill timer */
+#define FILL_MAX_TIME 900
+#define FILL_CHECK_TIME 60
 
-/* Header to bring together all hardware related functions and routines, set
- * things and stuff like that.
- */
+/* Heater size */
+#define HEATER_SIZE     2400L
+#define SPECIFIC_HEAT_WATER 4186L
 
 /* Clock and timing settings, time in 1/125's of a second*/
 #define LONG_TIME_INTERVAL          CLOCK_TICKS_PER_SECOND*600L
+
+/* Inputs */
+#include "temperature.h"//Temperature reading
+#include "level.h"      //Level and volume reading
 
 /* Data buss settings   */
 // USART
@@ -54,15 +58,6 @@
 #define FILL_PIN        PD7
 #define HEAT1_PIN       PD5
 #define HEAT2_PIN       PD6
-
-/* Heater size */
-#define HEATER_SIZE     2400L
-#define SPECIFIC_HEAT_WATER 4186L
-
-/* Fill timer */
-#define FILL_MAX_TIME 1920
-#define FILL_CHECK_TIME 60
-
 
 /* Initialise all hardware relevant to the project, usart, i2c, clock, external
  * sensors, Everyting!
