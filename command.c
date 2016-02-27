@@ -68,6 +68,7 @@ CRH"            \t H: Heat\r\n" \
 CRH"            \t P: Pump\r\n" \
 CRH"            0 get value/Other Set value:\r\n" \
 CRH"            \t t: Time (s)\r\n" \
+CRH"            \t a: Anaytics time interval (s)\r\n" \
 CRH"            \t T: Temperature (°C)\r\n" \
 CRH"            \t f: Fill now (or to level)\r\n" \
 CRH"            \t b: Boost now (or to temp)\r\n" \
@@ -247,9 +248,9 @@ CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             else {
                 send_string_p( string_LastLinePrefix );
                 send_string_p(PSTR("Setting the time to "));
-                send_uint32_half(commandvalue);
-                send_newline_crs();
                 timestamp = commandvalue;
+                send_uint32_half(timestamp);
+                send_newline_crs();
             }
             break;      
         case 'T':  //Temperature
@@ -282,6 +283,22 @@ CRH"            \t W: Watchdog reset status reg. "CRS"\r\n"));
             inputs->level = commandvalue;
 #endif
             break;
+            
+        case 'a': // Anaytics time interval
+            if ( commandvalue == 0 ){
+                send_string_p( string_LastLinePrefix );
+                send_string_p(PSTR("The analytics time interval is: "));
+                send_uint32_half(long_time_interval/CLOCK_TICKS_PER_SECOND);
+                send_newline_crs();
+            }
+            else {
+                send_string_p( string_LastLinePrefix );
+                send_string_p(PSTR("Setting the analytics time interval to "));
+                long_time_interval = commandvalue*CLOCK_TICKS_PER_SECOND;
+                send_uint32_half(long_time_interval/CLOCK_TICKS_PER_SECOND);
+                send_newline_crs();
+            }
+            break; 
 
         case 'v':  //Volume
             send_string_p( string_LastLinePrefix );

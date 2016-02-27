@@ -206,10 +206,19 @@ void calculate_outputs(struct Program *program) {
             if (outputs->fill) {
                 // Check how long we have been filling
                 filltimecount++; 
-                // If we have been filling too long disable filling and error
-                // The *5 is due to medium timestep
-                if (filltimecount >= (settings->fill_max_time)*
-                        (CLOCK_TICKS_PER_SECOND/MEDIUM_TIME_INTERVAL)) {
+                if ( 
+                    // If we have been filling too long disable filling and error
+                    // adjusting for the state machine time interval
+                    // Also if have been filling for 
+                    (filltimecount >= (settings->fill_max_time)*
+                        (CLOCK_TICKS_PER_SECOND/MEDIUM_TIME_INTERVAL)) 
+                    ||
+                    // OR the filler has been on for two minutes and the level is
+                    // still zero
+                    (filltimecount >= FILL_CHECK_TIME *
+                        (CLOCK_TICKS_PER_SECOND/MEDIUM_TIME_INTERVAL) &&
+                        inputs->level <= 0)
+                ) {
                     filltimecount = 0;
                     outputs->fill = 0;
                     settings->fill_enable = 0;

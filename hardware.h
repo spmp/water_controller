@@ -61,6 +61,7 @@
 
 /* Fill timer */
 #define FILL_MAX_TIME 1920
+#define FILL_CHECK_TIME 60
 
 
 /* Initialise all hardware relevant to the project, usart, i2c, clock, external
