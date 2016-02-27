@@ -10,7 +10,7 @@
 #include "command.h"
 #include "log.h"
 
-#define VERSION "2.7.3"
+#define VERSION "2.7.5"
 
 // Watchdog and reset state.
 /*

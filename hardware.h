@@ -27,7 +27,7 @@
  */
 
 /* Clock and timing settings, time in 1/125's of a second*/
-#define LONG_TIME_INTERVAL          CLOCK_TICKS_PER_SECOND*60L
+#define LONG_TIME_INTERVAL          CLOCK_TICKS_PER_SECOND*600L
 
 /* Data buss settings   */
 // USART
